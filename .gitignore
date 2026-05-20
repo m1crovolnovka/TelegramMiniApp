@@ -1,0 +1,26 @@
+# Gradle
+backend/.gradle/
+backend/build/
+backend/app/src/main/resources/.env
+backend/**/build/
+backend/!gradle/wrapper/gradle-wrapper.jar
+
+# Node
+frontend/node_modules/
+frontend/**/dist/
+frontend/**/.env
+frontend/**/.env.local
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+
+# Java
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
