@@ -4,19 +4,13 @@ spring:
   profiles:
     default: prod
 
-# CORS: единый список origins (фронтенд). Добавляйте URL сюда или через CASINO_CORS_ALLOWED_ORIGINS.
+# CORS: только origins фронтенда (без /api/...). Маска покрывает preview-деплои Vercel.
+# Env: CASINO_CORS_ALLOWED_ORIGIN_PATTERNS=..., CASINO_CORS_ALLOWED_ORIGINS=...
 casino:
   cors:
+    allowed-origin-patterns:
+      - https://telegram-mini-app-4njn*.vercel.app
     allowed-origins:
-      - https://telegram-mini-app-4njn.vercel.app/api/auth/telegram
-      - https://telegram-mini-app-4njn.vercel.app/api/users/me
-      - https://telegram-mini-app-4njn.vercel.app/api/economy/history
-      - https://telegram-mini-app-4njn.vercel.app/api/cards
-      - https://telegram-mini-app-4njn.vercel.app/api/cards/inventory
-      - https://telegram-mini-app-4njn.vercel.app/api/cards/collection-progress
-      - https://telegram-mini-app-4njn.vercel.app/api/packs
-      - https://telegram-mini-app-4njn.vercel.app/api/packs/open
-      - https://telegram-mini-app-4njn.vercel.app/api/packs/history
       - http://localhost:5173
       - http://localhost:5174
 

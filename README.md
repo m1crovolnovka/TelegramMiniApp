@@ -67,8 +67,8 @@ VITE_DEV_INIT_DATA=dev-player-login-token-2026
 
 | Variable | Value |
 |----------|--------|
-| `VITE_API_URL` | URL вашего бэкенда, например `https://api.your-server.com` |
+| `VITE_API_URL` | URL **бэкенда** (Spring), **не** `telegram-mini-app-4njn.vercel.app` |
 
-Без `VITE_API_URL` запросы идут на Vercel и возвращают **404** (это не CORS).
+**Частая ошибка:** `VITE_API_URL` = URL фронта на Vercel → запросы идут на `vercel.app/api/...`, CORS/404.
 
-CORS на бэкенде: `backend/app/src/main/resources/application.yml` → `casino.cors.allowed-origins` (уже добавлен Vercel URL). Новые домены — только в этот список.
+CORS на бэкенде: `application.yml` → `casino.cors` (маска `https://telegram-mini-app-4njn*.vercel.app` для production и preview).

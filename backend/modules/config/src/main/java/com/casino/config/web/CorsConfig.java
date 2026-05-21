@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -17,13 +18,19 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         List<String> origins = corsProperties.getAllowedOrigins();
-        if (origins == null || origins.isEmpty()) {
+        List<String> patterns = corsProperties.getAllowedOriginPatterns();
+        if (CollectionUtils.isEmpty(origins) && CollectionUtils.isEmpty(patterns)) {
             throw new IllegalStateException(
-                    "casino.cors.allowed-origins must not be empty — configure in application.yml");
+                    "Configure casino.cors.allowed-origins and/or casino.cors.allowed-origin-patterns in application.yml");
         }
 
         CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOrigins(List.of("https://telegram-mini-app-4njn.vercel.app/"));
+        if (!CollectionUtils.isEmpty(origins)) {
+            c.setAllowedOrigins(origins);
+        }
+        if (!CollectionUtils.isEmpty(patterns)) {
+            c.setAllowedOriginPatterns(patterns);
+        }
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         c.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         c.setExposedHeaders(List.of("Authorization"));
