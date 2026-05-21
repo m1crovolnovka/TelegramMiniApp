@@ -13,11 +13,15 @@ Default profile `dev` uses in-memory H2 (`application.yml`).
 
 ## Docker
 
+Сборка использует образ `gradle:8.14-jdk21-alpine` (не нужен `gradle-wrapper.jar` в репозитории).
+
 ```powershell
 cd backend
 docker build -t casino-backend .
 docker run --rm -p 8080:8080 --env-file .env casino-backend
 ```
+
+Контекст сборки — папка `backend/` (не корень монорепо).
 
 Card images are stored under `/app/data/storage` (volume-friendly). Override with `CASINO_STORAGE_LOCAL_DIR`.
 

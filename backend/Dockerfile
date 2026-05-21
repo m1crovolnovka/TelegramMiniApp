@@ -1,19 +1,15 @@
 # syntax=docker/dockerfile:1
 
-# --- Build ---
-FROM eclipse-temurin:21-jdk-alpine AS build
+# --- Build (official Gradle image — не зависит от gradle-wrapper.jar в git) ---
+FROM gradle:8.14-jdk21-alpine AS build
 WORKDIR /workspace
 
-RUN apk add --no-cache bash
-
-COPY gradlew gradlew.bat ./
-COPY gradle gradle/
 COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY gradle gradle/
 COPY app app/
 COPY modules modules/
 
-RUN chmod +x gradlew \
-    && ./gradlew :app:bootJar -x test --no-daemon
+RUN gradle :app:bootJar -x test --no-daemon
 
 # --- Runtime ---
 FROM eclipse-temurin:21-jre-alpine AS runtime

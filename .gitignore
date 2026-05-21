@@ -3,7 +3,6 @@ backend/.gradle/
 backend/build/
 backend/app/src/main/resources/.env
 backend/**/build/
-backend/!gradle/wrapper/gradle-wrapper.jar
 
 # Node
 frontend/node_modules/
@@ -23,4 +22,4 @@ npm-debug.log*
 # Java
 *.class
 *.jar
-!gradle/wrapper/gradle-wrapper.jar
+!backend/gradle/wrapper/gradle-wrapper.jar
