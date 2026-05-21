@@ -13,8 +13,9 @@ Thumbs.db
 .git/
 .gitignore
 
-# Local / secrets
+# Local / secrets (use --env-file at runtime, not baked into image)
 .env
+**/.env
 *.log
 
 # Not needed in image

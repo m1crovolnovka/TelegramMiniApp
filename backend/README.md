@@ -11,6 +11,18 @@ gradle :app:bootRun
 
 Default profile `dev` uses in-memory H2 (`application.yml`).
 
+## Docker
+
+```powershell
+cd backend
+docker build -t casino-backend .
+docker run --rm -p 8080:8080 --env-file .env casino-backend
+```
+
+Card images are stored under `/app/data/storage` (volume-friendly). Override with `CASINO_STORAGE_LOCAL_DIR`.
+
+Copy `.env.example` to `.env` and set `DB_*`, `TELEGRAM_BOT_TOKEN`, `CASINO_JWT_SECRET`.
+
 ## API overview (prefix `/api`)
 
 | Area | Endpoints |

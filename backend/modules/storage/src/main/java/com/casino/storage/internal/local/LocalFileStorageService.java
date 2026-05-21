@@ -14,10 +14,14 @@ public class LocalFileStorageService implements StoragePort {
 
     private final Path baseDir;
 
-    public LocalFileStorageService(@Value("${casino.storage.local-dir:build/card-images}") String localDir)
+    public LocalFileStorageService(@Value("${casino.storage.local-dir:data/storage}") String localDir)
             throws IOException {
         this.baseDir = Path.of(localDir).toAbsolutePath().normalize();
-        Files.createDirectories(this.baseDir);
+        try {
+            Files.createDirectories(this.baseDir);
+        } catch (IOException e) {
+            throw new IOException("Cannot create storage directory: " + this.baseDir, e);
+        }
     }
 
     @Override

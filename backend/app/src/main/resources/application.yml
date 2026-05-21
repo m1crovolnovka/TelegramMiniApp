@@ -29,6 +29,8 @@ casino:
     access-token-validity-seconds: 3600
   telegram:
     bot-token: ""
+  storage:
+    local-dir: data/storage
   dev:
     seed: true
     starter-coins: 5000
@@ -46,10 +48,12 @@ spring:
 
 casino:
   jwt:
-    secret: "change-me-use-long-random-secret-in-prod-min-256-bits-please-change-1234567890"
+    secret: ${CASINO_JWT_SECRET:change-me-use-long-random-secret-in-prod-min-256-bits-please-change-1234567890}
     access-token-validity-seconds: 3600
   telegram:
-    bot-token: ${TELEGRAM_BOT_TOKEN}
+    bot-token: ${TELEGRAM_BOT_TOKEN:}
+  storage:
+    local-dir: ${CASINO_STORAGE_LOCAL_DIR:/app/data/storage}
 
 management:
   endpoints:
