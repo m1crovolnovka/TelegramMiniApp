@@ -1,0 +1,22 @@
+# Build outputs
+**/build/
+**/.gradle/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Local / secrets
+.env
+*.log
+
+# Not needed in image
+README.md
+**/src/test/
