@@ -23,7 +23,7 @@ public class CorsConfig {
         }
 
         CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOrigins(origins);
+        c.setAllowedOrigins(List.of("https://telegram-mini-app-4njn.vercel.app/"));
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         c.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         c.setExposedHeaders(List.of("Authorization"));
