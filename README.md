@@ -57,4 +57,18 @@ VITE_API_URL=
 VITE_DEV_INIT_DATA=dev-player-login-token-2026
 ```
 
-Пустой `VITE_API_URL` — запросы через Vite proxy.
+Пустой `VITE_API_URL` — запросы через Vite proxy (только локально).
+
+### Production (Vercel)
+
+Фронт: [telegram-mini-app-4njn.vercel.app](https://telegram-mini-app-4njn.vercel.app/)
+
+В **Vercel → Settings → Environment Variables** добавьте:
+
+| Variable | Value |
+|----------|--------|
+| `VITE_API_URL` | URL вашего бэкенда, например `https://api.your-server.com` |
+
+Без `VITE_API_URL` запросы идут на Vercel и возвращают **404** (это не CORS).
+
+CORS на бэкенде: `backend/app/src/main/resources/application.yml` → `casino.cors.allowed-origins` (уже добавлен Vercel URL). Новые домены — только в этот список.
