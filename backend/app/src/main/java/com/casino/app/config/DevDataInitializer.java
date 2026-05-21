@@ -63,7 +63,7 @@ public class DevDataInitializer {
                         card("Мария", CardRarity.COMMON),
                         card("Дмитрий", CardRarity.COMMON),
                         card("Елена", CardRarity.RARE),
-                        card("Игорь", CardRarity.RARE),
+                        card("Вячеслав", CardRarity.RARE),
                         card("София", CardRarity.RARE),
                         card("Никита", CardRarity.LEGENDARY),
                         card("Анна", CardRarity.LEGENDARY));
