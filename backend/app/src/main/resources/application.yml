@@ -9,8 +9,7 @@ spring:
 casino:
   cors:
     allowed-origin-patterns:
-      - https://telegram-mini-app-4njn*.vercel.app
-      - https://telegram-mini-app-livid-mu.vercel.app
+      - https://telegram-mini-app*.vercel.app
     allowed-origins:
       - http://localhost:5173
       - http://localhost:5174
