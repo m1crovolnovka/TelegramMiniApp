@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const ADMIN_INIT = 'dev-admin-login-token-2026';
 
-export const api = axios.create({ baseURL: '' });
+export const api = axios.create({ baseURL: 'https://p01--telegramminiapp--jrk5phf8xmp4.code.run' });
 
 export function setToken(token: string | null) {
   if (token) {
