@@ -28,7 +28,7 @@ public class PackMapper {
                         .orElse(null);
         DroppedCardResponse dropped =
                 c == null
-                        ? new DroppedCardResponse(h.getDroppedCardDefinitionId(), "?", null)
+                        ? new DroppedCardResponse(h.getDroppedCardDefinitionId(), "?", null, null)
                         : new DroppedCardResponse(
                                 c.getId(), c.getTitle(), c.getRarity(), CardImageUrls.resolve(c.getImageStorageKey()));
         return new PackOpenHistoryItemResponse(

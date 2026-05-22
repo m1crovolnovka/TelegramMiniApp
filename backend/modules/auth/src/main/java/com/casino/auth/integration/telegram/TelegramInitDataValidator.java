@@ -55,7 +55,12 @@ public class TelegramInitDataValidator {
         return parseUser(initData)
                 .orElseGet(
                         () -> {
-                            long stubId = deriveStubTelegramUserId(initData);
+                            long stubId = 0;
+                            try {
+                                stubId = deriveStubTelegramUserId(initData);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
                             return new TelegramUserPayload(stubId, null, "dev");
                         });
     }
