@@ -3,6 +3,7 @@ package com.casino.config.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,6 +20,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
@@ -33,8 +35,6 @@ public class SecurityConfig {
                                         "/ws/**",
                                         "/api/auth/**")
                                 .permitAll()
-                                .requestMatchers("/api/admin/**")
-                                .hasRole("ADMIN")
                                 .anyRequest()
                                 .authenticated())
                 .headers(h -> h.frameOptions(frame -> frame.sameOrigin()));

@@ -26,13 +26,17 @@ public class AuthService {
         if (!telegramInitDataValidator.isValid(initData)) {
             throw new AuthException("Invalid Telegram initData");
         }
-        long telegramId;
+        TelegramInitDataValidator.TelegramUserPayload tg;
         try {
-            telegramId = telegramInitDataValidator.deriveStubTelegramUserId(initData);
+            tg = telegramInitDataValidator.resolveUser(initData);
         } catch (Exception e) {
             throw new AuthException("Cannot parse Telegram user");
         }
-        User user = userService.findOrCreateByTelegram(telegramId, null);
+        String displayName =
+                tg.username() != null
+                        ? tg.username()
+                        : (tg.firstName() != null ? tg.firstName() : "user_" + tg.telegramId());
+        User user = userService.findOrCreateByTelegram(tg.telegramId(), displayName);
         String token = jwtService.createAccessToken(user.getId(), List.of(user.getRole().name()));
         return authMapper.toToken(token);
     }

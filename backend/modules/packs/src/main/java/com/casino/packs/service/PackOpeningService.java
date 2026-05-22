@@ -3,6 +3,7 @@ package com.casino.packs.service;
 import com.casino.cards.api.InventoryPort;
 import com.casino.cards.entity.CardDefinition;
 import com.casino.cards.repository.CardDefinitionRepository;
+import com.casino.cards.util.CardImageUrls;
 import com.casino.economy.api.EconomyPort;
 import com.casino.economy.entity.TransactionType;
 import com.casino.packs.dto.response.DroppedCardResponse;
@@ -55,6 +56,8 @@ public class PackOpeningService {
     }
 
     private OpenPackResponse toResponse(CardDefinition c) {
-        return new OpenPackResponse(new DroppedCardResponse(c.getId(), c.getTitle(), c.getRarity()));
+        return new OpenPackResponse(
+                new DroppedCardResponse(
+                        c.getId(), c.getTitle(), c.getRarity(), CardImageUrls.resolve(c.getImageStorageKey())));
     }
 }

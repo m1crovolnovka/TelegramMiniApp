@@ -24,12 +24,14 @@ export interface CardDefinition {
   title: string;
   rarity: CardRarity;
   imageStorageKey: string;
+  imageUrl: string | null;
 }
 
 export interface InventoryItem {
   cardDefinitionId: number;
   title: string;
   rarity: CardRarity;
+  imageUrl: string | null;
   quantity: number;
   locked: boolean;
   lockedTradeId: number | null;
@@ -57,6 +59,7 @@ export interface DroppedCard {
   cardDefinitionId: number;
   title: string;
   rarity: CardRarity;
+  imageUrl: string | null;
 }
 
 export interface OpenPackResponse {
@@ -98,11 +101,31 @@ export interface BettingEvent {
   options: BettingOption[];
 }
 
+export interface TradeItem {
+  fromUserId: number;
+  cardDefinitionId: number | null;
+  quantity: number;
+  coinsAmount: number | null;
+}
+
 export interface Trade {
   id: number;
   initiatorUserId: number;
   partnerUserId: number;
   status: TradeStatus;
+  items: TradeItem[];
+}
+
+export interface PublicUser {
+  id: number;
+  username: string | null;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: number;
+  username: string;
+  balanceCoins: number;
 }
 
 export interface Notification {
@@ -118,6 +141,7 @@ export interface Transaction {
   operationId: string;
   transactionType: string;
   reason: string;
+  description: string;
   createdAt: string;
 }
 

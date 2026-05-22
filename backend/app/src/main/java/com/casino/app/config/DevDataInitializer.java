@@ -93,7 +93,10 @@ public class DevDataInitializer {
     }
 
     private CardDefinition card(String title, CardRarity rarity) {
-        return new CardDefinition(title, rarity, "cards/" + title.toLowerCase());
+        String slug = title.toLowerCase().replace(" ", "-");
+        String imageUrl =
+                "https://api.dicebear.com/7.x/avataaars/png?seed=" + slug + "&backgroundColor=b6e3f4";
+        return new CardDefinition(title, rarity, imageUrl);
     }
 
     private void ensureAdminUser() {

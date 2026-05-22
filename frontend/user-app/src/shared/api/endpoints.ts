@@ -10,6 +10,8 @@ import type {
   PackHistoryItem,
   Quest,
   QuestSubmission,
+  LeaderboardEntry,
+  PublicUser,
   RouletteResult,
   TokenResponse,
   Trade,
@@ -24,6 +26,10 @@ export const authApi = {
 
 export const userApi = {
   me: () => api.get<User>('/api/users/me').then((r) => r.data),
+  leaderboard: (limit = 50) =>
+    api.get<LeaderboardEntry[]>('/api/users/leaderboard', { params: { limit } }).then((r) => r.data),
+  byId: (id: number) => api.get<PublicUser>(`/api/users/${id}`).then((r) => r.data),
+  inventory: (id: number) => api.get<Inventory>(`/api/users/${id}/inventory`).then((r) => r.data),
 };
 
 export const cardsApi = {
@@ -68,14 +74,26 @@ export const bettingApi = {
 export const tradesApi = {
   create: (partnerUserId: number) =>
     api.post<Trade>('/api/trades', { partnerUserId }).then((r) => r.data),
-  addItem: (tradeId: number, cardDefinitionId: number, quantity: number) =>
+  addCard: (
+    tradeId: number,
+    cardDefinitionId: number,
+    quantity = 1,
+    fromUserId?: number,
+  ) =>
     api
-      .post<Trade>(`/api/trades/${tradeId}/items`, { cardDefinitionId, quantity })
+      .post<Trade>(`/api/trades/${tradeId}/items`, {
+        cardDefinitionId,
+        quantity,
+        ...(fromUserId != null ? { fromUserId } : {}),
+      })
       .then((r) => r.data),
+  addCoins: (tradeId: number, coinsAmount: number) =>
+    api.post<Trade>(`/api/trades/${tradeId}/items`, { coinsAmount }).then((r) => r.data),
   send: (tradeId: number) => api.post<Trade>(`/api/trades/${tradeId}/send`).then((r) => r.data),
   accept: (tradeId: number) =>
     api.post<Trade>(`/api/trades/${tradeId}/accept`).then((r) => r.data),
   reject: (tradeId: number) => api.post(`/api/trades/${tradeId}/reject`).then((r) => r.data),
+  get: (tradeId: number) => api.get<Trade>(`/api/trades/${tradeId}`).then((r) => r.data),
   history: () => api.get<Trade[]>('/api/trades/history').then((r) => r.data),
 };
 

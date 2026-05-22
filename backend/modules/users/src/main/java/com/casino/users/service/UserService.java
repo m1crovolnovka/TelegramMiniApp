@@ -22,6 +22,9 @@ public class UserService {
                 .findByTelegramId(telegramId)
                 .map(user -> {
                     economyPort.ensureWallet(user.getId());
+                    if (username != null && !username.isBlank()) {
+                        user.setUsername(username);
+                    }
                     return user;
                 })
                 .orElseGet(() -> {

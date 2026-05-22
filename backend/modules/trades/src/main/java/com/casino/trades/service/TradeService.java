@@ -1,5 +1,7 @@
 package com.casino.trades.service;
 
+import com.casino.cards.repository.UserCardRepository;
+import com.casino.economy.api.EconomyPort;
 import com.casino.trades.dto.request.AddTradeItemRequest;
 import com.casino.trades.dto.request.CreateTradeRequest;
 import com.casino.trades.dto.response.TradeResponse;
@@ -10,6 +12,7 @@ import com.casino.trades.exception.TradeException;
 import com.casino.trades.mapper.TradeMapper;
 import com.casino.trades.repository.TradeItemRepository;
 import com.casino.trades.repository.TradeRepository;
+import com.casino.users.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,9 +26,16 @@ public class TradeService {
     private final TradeItemRepository tradeItemRepository;
     private final TradeMapper tradeMapper;
     private final TradeExecutionService tradeExecutionService;
+    private final UserService userService;
+    private final UserCardRepository userCardRepository;
+    private final EconomyPort economyPort;
 
     @Transactional
     public TradeResponse create(long initiatorUserId, CreateTradeRequest req) {
+        if (initiatorUserId == req.partnerUserId()) {
+            throw new TradeException("Cannot trade with yourself");
+        }
+        userService.requireById(req.partnerUserId());
         Trade t =
                 tradeRepository.save(
                         new Trade(initiatorUserId, req.partnerUserId(), TradeStatus.DRAFT));
@@ -41,9 +51,45 @@ public class TradeService {
         if (authUserId != trade.getInitiatorUserId() && authUserId != trade.getPartnerUserId()) {
             throw new TradeException("Forbidden");
         }
-        tradeItemRepository.save(
-                new TradeItem(tradeId, authUserId, req.cardDefinitionId(), req.quantity()));
+        long itemOwner =
+                req.fromUserId() != null
+                        ? req.fromUserId()
+                        : authUserId;
+        if (itemOwner != trade.getInitiatorUserId() && itemOwner != trade.getPartnerUserId()) {
+            throw new TradeException("Invalid item owner");
+        }
+        boolean hasCoins = req.coinsAmount() != null && req.coinsAmount() > 0;
+        boolean hasCard = req.cardDefinitionId() != null;
+        if (hasCoins == hasCard) {
+            throw new TradeException("Specify either card or coins");
+        }
+        if (hasCoins) {
+            if (itemOwner != authUserId) {
+                throw new TradeException("Only the coin owner can offer coins");
+            }
+            if (economyPort.getBalance(authUserId) < req.coinsAmount()) {
+                throw new TradeException("Insufficient coins");
+            }
+            tradeItemRepository.save(new TradeItem(tradeId, authUserId, req.coinsAmount()));
+        } else {
+            int qty = req.quantity() != null ? req.quantity() : 1;
+            validateCardOwnership(itemOwner, req.cardDefinitionId(), qty);
+            tradeItemRepository.save(new TradeItem(tradeId, itemOwner, req.cardDefinitionId(), qty));
+        }
         return tradeMapper.toResponse(trade);
+    }
+
+    private void validateCardOwnership(long userId, long cardId, int qty) {
+        var row =
+                userCardRepository
+                        .findByUserIdAndCardDefinitionId(userId, cardId)
+                        .orElseThrow(() -> new TradeException("Card not in inventory"));
+        if (row.isLocked()) {
+            throw new TradeException("Card is locked");
+        }
+        if (row.getQuantity() < qty) {
+            throw new TradeException("Not enough cards");
+        }
     }
 
     @Transactional
@@ -54,6 +100,9 @@ public class TradeService {
         }
         if (trade.getStatus() != TradeStatus.DRAFT) {
             throw new TradeException("Invalid status");
+        }
+        if (tradeItemRepository.findByTradeId(tradeId).isEmpty()) {
+            throw new TradeException("Trade has no items");
         }
         trade.setStatus(TradeStatus.PENDING);
         return tradeMapper.toResponse(trade);
@@ -86,5 +135,14 @@ public class TradeService {
         return tradeRepository.findByInitiatorUserIdOrPartnerUserIdOrderByIdDesc(userId, userId).stream()
                 .map(tradeMapper::toResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TradeResponse get(long userId, long tradeId) {
+        Trade trade = tradeRepository.findById(tradeId).orElseThrow(() -> new TradeException("Not found"));
+        if (userId != trade.getInitiatorUserId() && userId != trade.getPartnerUserId()) {
+            throw new TradeException("Forbidden");
+        }
+        return tradeMapper.toResponse(trade);
     }
 }

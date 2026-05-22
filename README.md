@@ -32,14 +32,14 @@ npm install
 npm run dev
 ```
 
-http://localhost:5174 — вход с `dev-admin-login-token-2026` (роль ADMIN).
+http://localhost:5174 — вход через Telegram auth; доступ только если ваш **username** в `CASINO_ADMIN_ALLOWED_USERNAMES`.
 
 ## Структура frontend
 
 | Папка | Назначение |
 |-------|------------|
-| `frontend/user-app` | Игровое приложение: главная, магазин, казино, инвентарь, квесты, ставки, трейды |
-| `frontend/admin-panel` | Админка: статистика, экономика, квесты, события |
+| `frontend/user-app` | Mini App: казино, паки, коллекция, трейды, ставки (квесты — в боте) |
+| `frontend/admin-panel` | Админка (RU): пользователи, карточки, баланс, квесты, события |
 
 Vite проксирует `/api` → `http://localhost:8080`.
 
@@ -72,3 +72,22 @@ VITE_DEV_INIT_DATA=dev-player-login-token-2026
 **Частая ошибка:** `VITE_API_URL` = URL фронта на Vercel → запросы идут на `vercel.app/api/...`, CORS/404.
 
 CORS на бэкенде: `application.yml` → `casino.cors` (маска `https://telegram-mini-app-4njn*.vercel.app` для production и preview).
+
+### Backend (Docker / production)
+
+| Variable | Описание |
+|----------|----------|
+| `CASINO_ADMIN_ALLOWED_USERNAMES` | Telegram usernames через запятую (без @), кому доступна `/api/admin/**` |
+| `CASINO_JWT_SECRET` | Секрет JWT |
+| `TELEGRAM_BOT_TOKEN` | Токен бота для проверки initData |
+
+### Admin panel
+
+```
+VITE_API_URL=https://your-backend.example.com
+VITE_ADMIN_INIT_DATA=dev-admin-login-token-2026
+```
+
+### Квесты в боте
+
+В Mini App страница «Квесты» ведёт в бота: `VITE_QUESTS_BOT_URL=https://t.me/your_bot`.

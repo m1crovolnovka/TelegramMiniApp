@@ -60,4 +60,10 @@ public class TradeController {
         long userId = (Long) authentication.getPrincipal();
         return tradeService.history(userId);
     }
+
+    @GetMapping("/{tradeId}")
+    public TradeResponse get(Authentication authentication, @PathVariable long tradeId) {
+        long userId = (Long) authentication.getPrincipal();
+        return tradeService.get(userId, tradeId);
+    }
 }

@@ -13,6 +13,10 @@ casino:
     allowed-origins:
       - http://localhost:5173
       - http://localhost:5174
+  admin:
+    allowed-usernames:
+      - admin
+      # CASINO_ADMIN_ALLOWED_USERNAMES=nick1,nick2
 
 ---
 spring:

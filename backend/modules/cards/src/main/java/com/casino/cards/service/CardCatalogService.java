@@ -6,6 +6,7 @@ import com.casino.cards.dto.response.InventoryResponse;
 import com.casino.cards.entity.CardDefinition;
 import com.casino.cards.entity.UserCard;
 import com.casino.cards.mapper.CardMapper;
+import com.casino.cards.util.CardImageUrls;
 import com.casino.cards.repository.CardDefinitionRepository;
 import com.casino.cards.repository.UserCardRepository;
 import java.util.List;
@@ -46,10 +47,13 @@ public class CardCatalogService {
                                     CardDefinition def = defs.get(uc.getCardDefinitionId());
                                     String title = def != null ? def.getTitle() : "Unknown";
                                     var rarity = def != null ? def.getRarity() : null;
+                                    String imageUrl =
+                                            def != null ? CardImageUrls.resolve(def.getImageStorageKey()) : null;
                                     return new InventoryItemResponse(
                                             uc.getCardDefinitionId(),
                                             title,
                                             rarity,
+                                            imageUrl,
                                             uc.getQuantity(),
                                             uc.isLocked(),
                                             uc.getLockedTradeId());

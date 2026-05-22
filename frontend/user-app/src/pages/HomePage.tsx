@@ -8,7 +8,8 @@ import { Loader, PageError } from '../shared/ui/Loader';
 const quickLinks = [
   { to: '/shop', label: 'Открыть пак', emoji: '📦' },
   { to: '/casino', label: 'Казино', emoji: '🎰' },
-  { to: '/quests', label: 'Квесты', emoji: '⚔️' },
+  { to: '/quests', label: 'Квесты (бот)', emoji: '🤖' },
+  { to: '/collection', label: 'Коллекция', emoji: '📚' },
   { to: '/bets', label: 'Ставки', emoji: '🏆' },
   { to: '/trades', label: 'Трейды', emoji: '🔄' },
   { to: '/leaderboard', label: 'Рейтинг', emoji: '📊' },
@@ -75,9 +76,13 @@ export function HomePage() {
         <section className="rounded-xl bg-zinc-800/60 p-4">
           <h2 className="mb-2 text-sm font-semibold">Активные события</h2>
           {events.map((ev) => (
-            <p key={ev.id} className="text-sm">
-              {ev.title}
-            </p>
+            <Link
+              key={ev.id}
+              to="/bets"
+              className="block rounded-lg bg-zinc-900/80 px-3 py-2 text-sm hover:bg-zinc-700"
+            >
+              {ev.title} →
+            </Link>
           ))}
         </section>
       )}

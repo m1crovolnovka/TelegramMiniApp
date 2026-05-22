@@ -5,7 +5,7 @@ const nav = [
   { to: '/', label: 'Главная', icon: '🏠' },
   { to: '/shop', label: 'Магазин', icon: '🛒' },
   { to: '/casino', label: 'Казино', icon: '🎰' },
-  { to: '/inventory', label: 'Карты', icon: '🃏' },
+  { to: '/collection', label: 'Коллекция', icon: '🃏' },
   { to: '/profile', label: 'Профиль', icon: '👤' },
 ];
 

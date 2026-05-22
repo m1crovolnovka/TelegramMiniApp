@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":modules:config"))
     implementation(project(":modules:economy"))
     implementation(project(":modules:cards"))
+    implementation(project(":modules:users"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

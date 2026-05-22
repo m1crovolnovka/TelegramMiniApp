@@ -2,6 +2,7 @@ package com.casino.packs.mapper;
 
 import com.casino.cards.entity.CardDefinition;
 import com.casino.cards.repository.CardDefinitionRepository;
+import com.casino.cards.util.CardImageUrls;
 import com.casino.packs.dto.response.DroppedCardResponse;
 import com.casino.packs.dto.response.PackOpenHistoryItemResponse;
 import com.casino.packs.dto.response.PackResponse;
@@ -28,7 +29,8 @@ public class PackMapper {
         DroppedCardResponse dropped =
                 c == null
                         ? new DroppedCardResponse(h.getDroppedCardDefinitionId(), "?", null)
-                        : new DroppedCardResponse(c.getId(), c.getTitle(), c.getRarity());
+                        : new DroppedCardResponse(
+                                c.getId(), c.getTitle(), c.getRarity(), CardImageUrls.resolve(c.getImageStorageKey()));
         return new PackOpenHistoryItemResponse(
                 h.getId(), h.getPackId(), dropped, h.getCreatedAt());
     }

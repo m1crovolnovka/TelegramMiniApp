@@ -39,9 +39,7 @@ export function ProfilePage() {
                 key={t.id}
                 className="flex justify-between rounded-lg bg-zinc-800/60 px-3 py-2 text-sm"
               >
-                <span>
-                  {t.transactionType} — {t.reason}
-                </span>
+                <span className="max-w-[70%]">{t.description ?? t.reason}</span>
                 <span className={t.amount >= 0 ? 'text-green-400' : 'text-red-400'}>
                   {t.amount >= 0 ? '+' : ''}
                   {t.amount}

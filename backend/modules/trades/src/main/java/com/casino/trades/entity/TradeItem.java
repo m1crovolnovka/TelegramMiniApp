@@ -21,16 +21,30 @@ public class TradeItem extends BaseAuditableEntity {
     @Column(name = "from_user_id", nullable = false)
     private Long fromUserId;
 
-    @Column(name = "card_definition_id", nullable = false)
+    @Column(name = "card_definition_id")
     private Long cardDefinitionId;
 
     @Column(nullable = false)
     private int quantity = 1;
+
+    @Column(name = "coins_amount")
+    private Long coinsAmount;
 
     public TradeItem(Long tradeId, Long fromUserId, Long cardDefinitionId, int quantity) {
         this.tradeId = tradeId;
         this.fromUserId = fromUserId;
         this.cardDefinitionId = cardDefinitionId;
         this.quantity = quantity;
+    }
+
+    public TradeItem(Long tradeId, Long fromUserId, long coinsAmount) {
+        this.tradeId = tradeId;
+        this.fromUserId = fromUserId;
+        this.coinsAmount = coinsAmount;
+        this.quantity = 1;
+    }
+
+    public boolean isCoins() {
+        return coinsAmount != null && coinsAmount > 0;
     }
 }

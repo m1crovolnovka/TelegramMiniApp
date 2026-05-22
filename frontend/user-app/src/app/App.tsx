@@ -4,11 +4,11 @@ import { AppLayout } from '../shared/layouts/AppLayout';
 import { Loader, PageError } from '../shared/ui/Loader';
 import { HomePage } from '../pages/HomePage';
 import { ProfilePage } from '../pages/ProfilePage';
-import { InventoryPage } from '../pages/InventoryPage';
 import { ShopPage } from '../pages/ShopPage';
 import { CasinoPage } from '../pages/CasinoPage';
 import { TradesPage } from '../pages/TradesPage';
-import { QuestsPage } from '../pages/QuestsPage';
+import { BotQuestsPage } from '../pages/BotQuestsPage';
+import { CollectionPage } from '../pages/CollectionPage';
 import { BetsPage } from '../pages/BetsPage';
 import { LeaderboardPage } from '../pages/LeaderboardPage';
 
@@ -24,11 +24,12 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route index element={<HomePage />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="inventory" element={<InventoryPage />} />
+        <Route path="inventory" element={<CollectionPage />} />
+        <Route path="collection" element={<CollectionPage />} />
         <Route path="shop" element={<ShopPage />} />
         <Route path="casino" element={<CasinoPage />} />
         <Route path="trades" element={<TradesPage />} />
-        <Route path="quests" element={<QuestsPage />} />
+        <Route path="quests" element={<BotQuestsPage />} />
         <Route path="bets" element={<BetsPage />} />
         <Route path="leaderboard" element={<LeaderboardPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
