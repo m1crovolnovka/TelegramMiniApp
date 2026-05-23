@@ -17,6 +17,8 @@ casino:
     allowed-usernames:
       - admin
       - microvolnovka1
+      - "microvolnovka1"
+      - "@microvolnovka1"
       - ${CASINO_ADMIN_ALLOWED_USERNAMES}
 
 ---
