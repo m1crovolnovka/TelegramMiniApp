@@ -16,7 +16,6 @@ casino:
   admin:
     allowed-usernames:
       - admin
-      - microvolnovka1
       # CASINO_ADMIN_ALLOWED_USERNAMES=nick1,nick2
 
 ---

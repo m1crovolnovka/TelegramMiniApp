@@ -25,17 +25,14 @@ public class AdminAccessService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "Admin: username required");
         }
         String normalized = username.trim().toLowerCase().replace("@", "");
-        String proverka = "";
-        for(String s : adminAccessProperties.getAllowedUsernames()){
-            System.out.println(s);
-            proverka = proverka + s;
-        }
+        System.out.println(normalized);
         boolean allowed =
                 adminAccessProperties.getAllowedUsernames().stream()
                         .map(s -> s.trim().toLowerCase().replace("@", ""))
                         .anyMatch(normalized::equals);
+        System.out.println(allowed);
         if (!allowed) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "Admin access denied" + proverka);
+            throw new BusinessException(ErrorCode.FORBIDDEN, "Admin access denied");
         }
     }
 }
