@@ -25,6 +25,10 @@ public class AdminAccessService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "Admin: username required");
         }
         String normalized = username.trim().toLowerCase().replace("@", "");
+        adminAccessProperties.getAllowedUsernames().stream().map(e->{
+            System.out.println(e);
+            return null;
+        }).close();
         boolean allowed =
                 adminAccessProperties.getAllowedUsernames().stream()
                         .map(s -> s.trim().toLowerCase().replace("@", ""))
