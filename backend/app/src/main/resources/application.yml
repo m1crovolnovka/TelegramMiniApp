@@ -16,10 +16,7 @@ casino:
   admin:
     allowed-usernames:
       - admin
-      - microvolnovka1
-      - "microvolnovka1"
-      - "@microvolnovka1"
-      - ${CASINO_ADMIN_ALLOWED_USERNAMES}
+      # CASINO_ADMIN_ALLOWED_USERNAMES=nick1,nick2
 
 ---
 spring:
