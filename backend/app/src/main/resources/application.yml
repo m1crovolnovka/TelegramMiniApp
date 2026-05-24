@@ -81,8 +81,8 @@ management:
 
 quest-bot:
   telegram:
-    token: ${QUEST_BOT_TOKEN:}
-    username: ${QUEST_BOT_USERNAME:}
+    token: ${QUEST_BOT_TOKEN:8607127198:AAHqfDRzX412yAz0q7NuhAK9P2e2T-rx2o4}
+    username: ${QUEST_BOT_USERNAME:qrtegebot}
   admin:
     telegram-ids: ${QUEST_BOT_ADMIN_IDS:}
     usernames: ${QUEST_BOT_ADMIN_USERNAMES:admin}
