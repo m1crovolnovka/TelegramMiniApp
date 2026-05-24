@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: casino-quest-bot
+  datasource:
+    url: ${QUEST_BOT_DB_URL:jdbc:h2:mem:questbot;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
+    username: ${QUEST_BOT_DB_USER:sa}
+    password: ${QUEST_BOT_DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+server:
+  port: ${QUEST_BOT_PORT:8081}
+
+quest-bot:
+  telegram:
+    token: ${QUEST_BOT_TOKEN:}
+    username: ${QUEST_BOT_USERNAME:}
+  admin:
+    telegram-ids: ${QUEST_BOT_ADMIN_IDS:}
+    usernames: ${QUEST_BOT_ADMIN_USERNAMES:admin}
+  casino:
+    base-url: ${CASINO_API_URL:http://localhost:8080}
+    internal-api-key: ${CASINO_INTERNAL_API_KEY:dev-internal-key}

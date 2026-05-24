@@ -49,6 +49,9 @@ public class RouletteService {
     }
 
     private long computePayout(RouletteBetType type, Integer number, int rolled, long stake) {
+        if (type == RouletteBetType.NUMBER) {
+            return number != null && number == rolled ? stake * 36 : 0;
+        }
         if (rolled == 0) {
             return 0;
         }
@@ -57,7 +60,7 @@ public class RouletteService {
             case BLACK -> !REDS.contains(rolled) ? stake * 2 : 0;
             case ODD -> rolled % 2 == 1 ? stake * 2 : 0;
             case EVEN -> rolled % 2 == 0 ? stake * 2 : 0;
-            case NUMBER -> number != null && number == rolled ? stake * 36 : 0;
+            case NUMBER -> 0;
         };
     }
 

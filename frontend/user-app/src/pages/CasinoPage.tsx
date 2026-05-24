@@ -140,6 +140,31 @@ export function CasinoPage() {
             <Button variant="secondary" loading={busy} onClick={() => betRoulette('EVEN')}>
               Чёт
             </Button>
+            <Button variant="secondary" loading={busy} onClick={() => betRoulette('NUMBER', 0)}>
+              0 (zero)
+            </Button>
+          </div>
+          <div className="max-h-40 overflow-y-auto rounded-lg border border-zinc-700 p-2">
+            <p className="mb-2 text-xs text-zinc-400">Ставка на число (0–36)</p>
+            <div className="grid grid-cols-6 gap-1">
+              {Array.from({ length: 37 }, (_, n) => (
+                <button
+                  key={n}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => betRoulette('NUMBER', n)}
+                  className={`rounded px-1 py-1 text-xs font-semibold ${
+                    n === 0
+                      ? 'bg-green-700'
+                      : [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36].includes(n)
+                        ? 'bg-red-800'
+                        : 'bg-zinc-800'
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

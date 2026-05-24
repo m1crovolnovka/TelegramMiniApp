@@ -34,6 +34,7 @@ export interface AdminCard {
   id: number;
   title: string;
   rarity: string;
+  telegramUsername: string | null;
   imageUrl: string | null;
 }
 
@@ -54,8 +55,17 @@ export const adminApi = {
   userTransactions: (id: number) =>
     api.get<AdminTransaction[]>(`/api/admin/users/${id}/transactions`),
   cards: () => api.get<AdminCard[]>('/api/admin/cards'),
-  createCard: (body: { title: string; rarity: string; imageUrl?: string }) =>
-    api.post<AdminCard>('/api/admin/cards', body),
+  createCard: (body: {
+    title: string;
+    rarity: string;
+    telegramUsername?: string;
+    imageUrl?: string;
+  }) => api.post<AdminCard>('/api/admin/cards', body),
+  updateCard: (
+    id: number,
+    body: { title: string; rarity: string; telegramUsername?: string; imageUrl?: string },
+  ) => api.put<AdminCard>(`/api/admin/cards/${id}`, body),
+  deleteCard: (id: number) => api.delete(`/api/admin/cards/${id}`),
   addCoins: (userId: number, amount: number, reason: string) =>
     api.post('/api/admin/economy/add', { userId, amount, reason }),
   removeCoins: (userId: number, amount: number, reason: string) =>

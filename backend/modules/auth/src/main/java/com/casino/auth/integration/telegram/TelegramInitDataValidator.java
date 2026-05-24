@@ -8,12 +8,17 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class TelegramInitDataValidator {
+
+    private static final Pattern DEV_USERNAME_PATTERN =
+            Pattern.compile("dev-([a-zA-Z0-9_]+)-", Pattern.CASE_INSENSITIVE);
 
     private final TelegramProperties telegramProperties;
     private final ObjectMapper objectMapper;
@@ -50,18 +55,18 @@ public class TelegramInitDataValidator {
         return Optional.empty();
     }
 
-    /** Stable id: real Telegram user id from initData, or deterministic hash for dev tokens. */
+    /** Real Telegram user from initData, or deterministic dev user from token string. */
     public TelegramUserPayload resolveUser(String initData) throws Exception {
         return parseUser(initData)
                 .orElseGet(
                         () -> {
-                            long stubId = 0;
                             try {
-                                stubId = deriveStubTelegramUserId(initData);
+                                long stubId = deriveStubTelegramUserId(initData);
+                                String username = resolveDevUsername(initData);
+                                return new TelegramUserPayload(stubId, username, username);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
-                            return new TelegramUserPayload(stubId, null, "dev");
                         });
     }
 
@@ -70,6 +75,21 @@ public class TelegramInitDataValidator {
         byte[] digest = md.digest(initData.getBytes(StandardCharsets.UTF_8));
         String hex = HexFormat.of().formatHex(digest);
         return Long.parseLong(hex.substring(0, 15), 16);
+    }
+
+    private String resolveDevUsername(String initData) {
+        String lower = initData.toLowerCase();
+        if (lower.contains("admin")) {
+            return "admin";
+        }
+        if (lower.contains("player")) {
+            return "player";
+        }
+        Matcher matcher = DEV_USERNAME_PATTERN.matcher(initData);
+        if (matcher.find()) {
+            return matcher.group(1).toLowerCase();
+        }
+        return "dev";
     }
 
     public record TelegramUserPayload(long telegramId, String username, String firstName) {}

@@ -32,11 +32,10 @@ public class AuthService {
         } catch (Exception e) {
             throw new AuthException("Cannot parse Telegram user");
         }
-        String displayName =
-                tg.username() != null
-                        ? tg.username()
-                        : (tg.firstName() != null ? tg.firstName() : "user_" + tg.telegramId());
-        User user = userService.findOrCreateByTelegram(tg.telegramId(), displayName);
+        if (tg.username() == null || tg.username().isBlank()) {
+            throw new AuthException("Telegram username is required. Set it in Telegram settings.");
+        }
+        User user = userService.findOrCreateByUsername(tg.username(), tg.telegramId());
         String token = jwtService.createAccessToken(user.getId(), List.of(user.getRole().name()));
         return authMapper.toToken(token);
     }

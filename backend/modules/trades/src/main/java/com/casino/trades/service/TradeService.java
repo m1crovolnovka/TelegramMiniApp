@@ -32,13 +32,11 @@ public class TradeService {
 
     @Transactional
     public TradeResponse create(long initiatorUserId, CreateTradeRequest req) {
-        if (initiatorUserId == req.partnerUserId()) {
+        long partnerUserId = userService.requireByUsername(req.partnerUsername()).getId();
+        if (initiatorUserId == partnerUserId) {
             throw new TradeException("Cannot trade with yourself");
         }
-        userService.requireById(req.partnerUserId());
-        Trade t =
-                tradeRepository.save(
-                        new Trade(initiatorUserId, req.partnerUserId(), TradeStatus.DRAFT));
+        Trade t = tradeRepository.save(new Trade(initiatorUserId, partnerUserId, TradeStatus.DRAFT));
         return tradeMapper.toResponse(t);
     }
 

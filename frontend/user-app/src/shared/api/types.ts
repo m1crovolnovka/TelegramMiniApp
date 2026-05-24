@@ -23,6 +23,7 @@ export interface CardDefinition {
   id: number;
   title: string;
   rarity: CardRarity;
+  telegramUsername: string | null;
   imageStorageKey: string;
   imageUrl: string | null;
 }

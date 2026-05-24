@@ -8,7 +8,7 @@ import { Loader, PageError } from '../shared/ui/Loader';
 
 export function TradesPage() {
   const me = useUserStore((s) => s.user);
-  const [partnerId, setPartnerId] = useState('');
+  const [partnerUsername, setPartnerUsername] = useState('');
   const [partner, setPartner] = useState<PublicUser | null>(null);
   const [myInv, setMyInv] = useState<InventoryItem[]>([]);
   const [partnerInv, setPartnerInv] = useState<InventoryItem[]>([]);
@@ -29,12 +29,13 @@ export function TradesPage() {
   }, []);
 
   const lookupPartner = async () => {
-    const id = Number(partnerId);
-    if (!id) return;
+    const username = partnerUsername.trim().replace(/^@/, '');
+    if (!username) return;
     setLoading(true);
     setError(null);
     try {
-      const [u, inv] = await Promise.all([userApi.byId(id), userApi.inventory(id)]);
+      const u = await userApi.byUsername(username);
+      const inv = await userApi.inventory(u.id);
       setPartner(u);
       setPartnerInv(inv.items);
     } catch (e) {
@@ -46,14 +47,18 @@ export function TradesPage() {
   };
 
   const startTrade = async () => {
-    const id = Number(partnerId);
-    if (!id || !me) return;
+    const username = partnerUsername.trim().replace(/^@/, '');
+    if (!username || !me) return;
     setLoading(true);
     try {
-      const t = await tradesApi.create(id);
+      const t = await tradesApi.create(username);
       setTrade(t);
       const mine = await userApi.inventory(me.id);
       setMyInv(mine.items);
+      if (partner) {
+        const inv = await userApi.inventory(partner.id);
+        setPartnerInv(inv.items);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Ошибка');
     } finally {
@@ -137,23 +142,21 @@ export function TradesPage() {
 
       {!trade && (
         <section className="space-y-2 rounded-xl bg-zinc-800/80 p-4">
-          <p className="text-sm text-zinc-400">ID партнёра</p>
+          <p className="text-sm text-zinc-400">Telegram username партнёра</p>
           <div className="flex gap-2">
             <input
-              type="number"
-              value={partnerId}
-              onChange={(e) => setPartnerId(e.target.value)}
+              type="text"
+              value={partnerUsername}
+              onChange={(e) => setPartnerUsername(e.target.value)}
               className="flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2"
-              placeholder="User ID"
+              placeholder="@username"
             />
             <Button variant="secondary" onClick={lookupPartner} loading={loading}>
               Найти
             </Button>
           </div>
           {partner && (
-            <p className="text-sm text-green-400">
-              {partner.username ?? `User #${partner.id}`}
-            </p>
+            <p className="text-sm text-green-400">@{partner.username ?? partner.id}</p>
           )}
           {partnerInv.length > 0 && (
             <div>

@@ -96,7 +96,9 @@ public class DevDataInitializer {
         String slug = title.toLowerCase().replace(" ", "-");
         String imageUrl =
                 "https://api.dicebear.com/7.x/avataaars/png?seed=" + slug + "&backgroundColor=b6e3f4";
-        return new CardDefinition(title, rarity, imageUrl);
+        CardDefinition c = new CardDefinition(title, rarity, imageUrl);
+        c.setTelegramUsername(slug);
+        return c;
     }
 
     private void ensureAdminUser() {
@@ -109,7 +111,7 @@ public class DevDataInitializer {
         }
         User admin =
                 userRepository
-                        .findByTelegramId(adminTelegramId)
+                        .findByUsernameIgnoreCase("admin")
                         .orElseGet(
                                 () ->
                                         userRepository.save(

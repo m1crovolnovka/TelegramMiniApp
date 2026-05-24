@@ -5,4 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateCardRequest(
-        @NotBlank String title, @NotNull CardRarity rarity, String imageUrl) {}
+        @NotBlank String title,
+        @NotNull CardRarity rarity,
+        String telegramUsername,
+        String imageUrl) {}

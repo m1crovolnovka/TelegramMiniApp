@@ -1,5 +1,5 @@
 package com.casino.trades.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
-public record CreateTradeRequest(@NotNull Long partnerUserId) {}
+public record CreateTradeRequest(@NotBlank String partnerUsername) {}

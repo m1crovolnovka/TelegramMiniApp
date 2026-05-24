@@ -43,6 +43,12 @@ public class UserController {
         return leaderboardService.topByBalance(limit);
     }
 
+    @GetMapping("/by-username/{username}")
+    public PublicUserResponse byUsername(@PathVariable String username) {
+        User user = userService.requireByUsername(username);
+        return new PublicUserResponse(user.getId(), user.getUsername());
+    }
+
     @GetMapping("/{id}")
     public PublicUserResponse byId(@PathVariable long id) {
         User user = userService.requireById(id);

@@ -11,6 +11,11 @@ public class CardMapper {
     public CardDefinitionResponse toResponse(CardDefinition c) {
         String key = c.getImageStorageKey();
         return new CardDefinitionResponse(
-                c.getId(), c.getTitle(), c.getRarity(), key, CardImageUrls.resolve(key));
+                c.getId(),
+                c.getTitle(),
+                c.getRarity(),
+                c.getTelegramUsername(),
+                key,
+                CardImageUrls.resolve(key));
     }
 }

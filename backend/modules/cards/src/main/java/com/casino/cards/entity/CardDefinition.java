@@ -27,6 +27,9 @@ public class CardDefinition extends BaseAuditableEntity {
     @Column(name = "image_storage_key", length = 512)
     private String imageStorageKey;
 
+    @Column(name = "telegram_username", length = 64)
+    private String telegramUsername;
+
     public CardDefinition(String title, CardRarity rarity, String imageStorageKey) {
         this.title = title;
         this.rarity = rarity;

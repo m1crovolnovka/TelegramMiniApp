@@ -29,6 +29,8 @@ export const userApi = {
   leaderboard: (limit = 50) =>
     api.get<LeaderboardEntry[]>('/api/users/leaderboard', { params: { limit } }).then((r) => r.data),
   byId: (id: number) => api.get<PublicUser>(`/api/users/${id}`).then((r) => r.data),
+  byUsername: (username: string) =>
+    api.get<PublicUser>(`/api/users/by-username/${encodeURIComponent(username)}`).then((r) => r.data),
   inventory: (id: number) => api.get<Inventory>(`/api/users/${id}/inventory`).then((r) => r.data),
 };
 
@@ -72,8 +74,8 @@ export const bettingApi = {
 };
 
 export const tradesApi = {
-  create: (partnerUserId: number) =>
-    api.post<Trade>('/api/trades', { partnerUserId }).then((r) => r.data),
+  create: (partnerUsername: string) =>
+    api.post<Trade>('/api/trades', { partnerUsername }).then((r) => r.data),
   addCard: (
     tradeId: number,
     cardDefinitionId: number,

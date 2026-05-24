@@ -88,6 +88,29 @@ VITE_API_URL=https://your-backend.example.com
 VITE_ADMIN_INIT_DATA=dev-admin-login-token-2026
 ```
 
-### Квесты в боте
+### Квесты в боте (`quest-bot-app`)
+
+Отдельное Spring Boot приложение в `backend/quest-bot-app` (порт **8081**).
+
+```powershell
+cd backend
+gradle :quest-bot-app:bootRun
+```
+
+| Variable | Описание |
+|----------|----------|
+| `QUEST_BOT_TOKEN` | Токен Telegram-бота квестов |
+| `QUEST_BOT_USERNAME` | Username бота (без @) |
+| `QUEST_BOT_ADMIN_IDS` | Telegram ID админов через запятую |
+| `QUEST_BOT_ADMIN_USERNAMES` | Usernames админов (по умолчанию `admin`) |
+| `CASINO_API_URL` | URL casino backend (по умолчанию `http://localhost:8080`) |
+| `CASINO_INTERNAL_API_KEY` | Ключ internal API (тот же, что `casino.internal.api-key`) |
+
+Пользователь идентифицируется по **Telegram username** (обязателен). При `/start` бот регистрирует пользователя в Casino через internal API.  
+После одобрения квеста админом обоим начисляются коины и карточки (1 квест — common, 7 — rare, 15 — legendary между одной парой).
 
 В Mini App страница «Квесты» ведёт в бота: `VITE_QUESTS_BOT_URL=https://t.me/your_bot`.
+
+### Идентификация пользователей
+
+Уникальный ключ — **Telegram username** (без @). Dev-токены: `dev-admin-login-token-2026` → `admin`, `dev-player-login-token-2026` → `player`.

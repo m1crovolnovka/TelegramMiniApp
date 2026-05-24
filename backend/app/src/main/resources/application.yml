@@ -7,6 +7,8 @@ spring:
 # CORS: только origins фронтенда (без /api/...). Маска покрывает preview-деплои Vercel.
 # Env: CASINO_CORS_ALLOWED_ORIGIN_PATTERNS=..., CASINO_CORS_ALLOWED_ORIGINS=...
 casino:
+  internal:
+    api-key: ${CASINO_INTERNAL_API_KEY:dev-internal-key}
   cors:
     allowed-origin-patterns:
       - https://telegram-mini-app*.vercel.app
@@ -38,6 +40,8 @@ spring:
         format_sql: true
 
 casino:
+  internal:
+    api-key: dev-internal-key
   jwt:
     secret: "change-me-use-long-random-secret-in-prod-min-256-bits-please-change-1234567890"
     access-token-validity-seconds: 3600

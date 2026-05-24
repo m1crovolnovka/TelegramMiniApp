@@ -24,4 +24,5 @@ include(
     "modules:trades",
     "modules:admin",
     "modules:notifications",
+    "quest-bot-app",
 )

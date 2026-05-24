@@ -2,6 +2,7 @@
 backend/.gradle/
 backend/build/
 backend/app/src/main/resources/.env
+backend/.env.example
 backend/**/build/
 
 # Node
@@ -18,6 +19,9 @@ npm-debug.log*
 .vscode/
 *.swp
 .DS_Store
+
+# Reference clone
+_qr-tege-ref/
 
 # Java
 *.class
