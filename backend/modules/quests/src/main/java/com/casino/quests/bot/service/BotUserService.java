@@ -3,8 +3,9 @@ package com.casino.quests.bot.service;
 import com.casino.quests.bot.config.QuestBotProperties;
 import com.casino.quests.bot.entity.UserEntity;
 import com.casino.quests.bot.integration.CasinoQuestBridge;
-import com.casino.quests.bot.repo.UserRepository;
+import com.casino.quests.bot.repo.BotUserRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BotUserService {
 
-    private final UserRepository userRepository;
+    private final BotUserRepository botUserRepository;
     private final QuestBotProperties properties;
     private final CasinoQuestBridge casinoQuestBridge;
 
@@ -21,26 +22,26 @@ public class BotUserService {
     public UserEntity getOrCreateByTelegram(String username, long chatId) {
         String normalized = normalize(username);
         UserEntity user =
-                userRepository
+                botUserRepository
                         .findByUsernameIgnoreCase(normalized)
                         .map(
                                 existing -> {
                                     existing.setTelegramChatId(chatId);
                                     return existing;
                                 })
-                        .orElseGet(() -> userRepository.save(new UserEntity(normalized, chatId)));
+                        .orElseGet(() -> botUserRepository.save(new UserEntity(normalized, chatId)));
         casinoQuestBridge.ensureCasinoUser(normalized, chatId);
         return user;
     }
 
     @Transactional(readOnly = true)
     public List<UserEntity> all() {
-        return userRepository.findAll();
+        return botUserRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public java.util.Optional<UserEntity> findByUsername(String username) {
-        return userRepository.findByUsernameIgnoreCase(normalize(username));
+    public Optional<UserEntity> findByUsername(String username) {
+        return botUserRepository.findByUsernameIgnoreCase(normalize(username));
     }
 
     @Transactional(readOnly = true)
@@ -52,5 +53,3 @@ public class BotUserService {
         return username.trim().toLowerCase().replace("@", "");
     }
 }
-
-
