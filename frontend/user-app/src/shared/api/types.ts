@@ -56,8 +56,24 @@ export interface Quest { id: number; title: string; rewardCoins: number; status:
 export interface QuestSubmission { id: number; questId: number; status: SubmissionStatus; proofText: string }
 export interface BettingOption { id: number; label: string; totalStakeCoins: number; winning: boolean }
 export interface BettingEvent { id: number; title: string; status: EventStatus; options: BettingOption[] }
-export interface TradeItem { fromUserId: number; cardDefinitionId: number | null; quantity: number; coinsAmount: number | null }
-export interface Trade { id: number; initiatorUserId: number; partnerUserId: number; status: TradeStatus; items: TradeItem[] }
+export interface TradeItem {
+  fromUserId: number;
+  fromUsername: string | null;
+  cardDefinitionId: number | null;
+  cardTitle: string | null;
+  quantity: number;
+  coinsAmount: number | null;
+}
+export interface Trade {
+  id: number;
+  initiatorUserId: number;
+  initiatorUsername: string | null;
+  partnerUserId: number;
+  partnerUsername: string | null;
+  status: TradeStatus;
+  items: TradeItem[];
+}
+export interface QuestTask { id: number; description: string; rewardCoins: number }
 export interface PublicUser { id: number; username: string | null }
 export interface LeaderboardEntry { rank: number; userId: number; username: string; balanceCoins: number; uniqueStudentsOwned: number }
 export interface Notification { id: number; message: string; type: NotificationType; read: boolean }

@@ -107,9 +107,10 @@ export const adminApi = {
   deleteCard: (id: number) => api.delete(`/api/admin/cards/${id}`),
   addCoins: (userId: number, amount: number, reason: string) => api.post('/api/admin/economy/add', { userId, amount, reason }),
   removeCoins: (userId: number, amount: number, reason: string) => api.post('/api/admin/economy/remove', { userId, amount, reason }),
-  createQuest: (title: string, rewardCoins: number) => api.post('/api/admin/quests', { title, rewardCoins }),
-  approveSubmission: (submissionId: number) => api.post(`/api/admin/quests/submissions/${submissionId}/approve`),
-  rejectSubmission: (submissionId: number) => api.post(`/api/admin/quests/submissions/${submissionId}/reject`),
+  questTasks: () => api.get<import('./types').QuestTask[]>('/api/admin/quest-tasks'),
+  createQuestTask: (description: string, rewardCoins: number) =>
+    api.post('/api/admin/quest-tasks', { description, rewardCoins }),
+  deleteQuestTask: (id: number) => api.delete(`/api/admin/quest-tasks/${id}`),
   createEvent: (title: string, optionLabels: string[]) => api.post('/api/admin/betting/events', { title, optionLabels }),
   closeEvent: (eventId: number) => api.post(`/api/admin/betting/events/${eventId}/close`),
   settleEvent: (eventId: number, winningOptionId: number) => api.post(`/api/admin/betting/events/${eventId}/settle`, { winningOptionId }),

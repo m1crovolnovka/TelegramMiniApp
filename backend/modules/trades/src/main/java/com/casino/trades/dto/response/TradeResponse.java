@@ -6,6 +6,8 @@ import java.util.List;
 public record TradeResponse(
         long id,
         long initiatorUserId,
+        String initiatorUsername,
         long partnerUserId,
+        String partnerUsername,
         TradeStatus status,
         List<TradeItemResponse> items) {}

@@ -52,6 +52,14 @@ casino:
   dev:
     seed: true
     starter-coins: 5000
+  quest-bot:
+    telegram:
+      token: ${QUEST_BOT_TOKEN:}
+      username: ${QUEST_BOT_USERNAME:}
+    mini-app-url: ${CASINO_MINI_APP_URL:http://localhost:5173}
+    admin:
+      telegram-ids: ${QUEST_BOT_ADMIN_IDS:}
+      usernames: ${QUEST_BOT_ADMIN_USERNAMES:admin}
 
 ---
 spring:
@@ -72,21 +80,18 @@ casino:
     bot-token: ${TELEGRAM_BOT_TOKEN:}
   storage:
     local-dir: ${CASINO_STORAGE_LOCAL_DIR:/app/data/storage}
+  quest-bot:
+    telegram:
+      token: ${QUEST_BOT_TOKEN:}
+      username: ${QUEST_BOT_USERNAME:}
+    mini-app-url: ${CASINO_MINI_APP_URL:http://localhost:5173}
+    admin:
+      telegram-ids: ${QUEST_BOT_ADMIN_IDS:}
+      usernames: ${QUEST_BOT_ADMIN_USERNAMES:admin}
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-
-quest-bot:
-  telegram:
-    token: ${QUEST_BOT_TOKEN:}
-    username: ${QUEST_BOT_USERNAME:qrtegebot}
-  admin:
-    telegram-ids: ${QUEST_BOT_ADMIN_IDS:}
-    usernames: ${QUEST_BOT_ADMIN_USERNAMES:admin}
-  casino:
-    base-url: ${CASINO_API_URL:http://localhost:8080}
-    internal-api-key: ${CASINO_INTERNAL_API_KEY:dev-internal-key}
 

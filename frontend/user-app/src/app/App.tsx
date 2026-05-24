@@ -11,12 +11,18 @@ import { BotQuestsPage } from '../pages/BotQuestsPage';
 import { CollectionPage } from '../pages/CollectionPage';
 import { BetsPage } from '../pages/BetsPage';
 import { LeaderboardPage } from '../pages/LeaderboardPage';
-import { AdminPage } from '../pages/AdminPage';
+import { AdminLayout } from '../pages/admin/AdminLayout';
+import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
+import { AdminUserDetailPage } from '../pages/admin/AdminUserDetailPage';
+import { AdminCardsPage } from '../pages/admin/AdminCardsPage';
+import { AdminQuestsPage } from '../pages/admin/AdminQuestsPage';
+import { AdminEventsPage } from '../pages/admin/AdminEventsPage';
 
 export default function App() {
   const { user, error, booting, login } = useAuthBootstrap();
 
-  if (booting) return <Loader text="¬ход..." />;
+  if (booting) return <Loader text="????..." />;
   if (error && !user) return <PageError message={error} onRetry={login} />;
   if (!user) return <Loader />;
 
@@ -33,7 +39,14 @@ export default function App() {
         <Route path="quests" element={<BotQuestsPage />} />
         <Route path="bets" element={<BetsPage />} />
         <Route path="leaderboard" element={<LeaderboardPage />} />
-        <Route path="admin" element={<AdminPage />} />
+        <Route path="admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="users/:id" element={<AdminUserDetailPage />} />
+          <Route path="cards" element={<AdminCardsPage />} />
+          <Route path="quests" element={<AdminQuestsPage />} />
+          <Route path="events" element={<AdminEventsPage />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

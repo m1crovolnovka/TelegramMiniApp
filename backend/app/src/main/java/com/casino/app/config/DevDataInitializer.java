@@ -11,8 +11,8 @@ import com.casino.packs.entity.Pack;
 import com.casino.packs.entity.PackDropRow;
 import com.casino.packs.repository.PackDropRowRepository;
 import com.casino.packs.repository.PackRepository;
-import com.casino.quests.dto.request.CreateQuestRequest;
-import com.casino.quests.service.QuestManagementService;
+import com.casino.quests.bot.entity.QuestTaskEntity;
+import com.casino.quests.bot.repo.QuestTaskRepository;
 import com.casino.auth.integration.telegram.TelegramInitDataValidator;
 import com.casino.users.entity.User;
 import com.casino.users.entity.UserRole;
@@ -41,7 +41,7 @@ public class DevDataInitializer {
     private final CardDefinitionRepository cardDefinitionRepository;
     private final PackRepository packRepository;
     private final PackDropRowRepository packDropRowRepository;
-    private final QuestManagementService questManagementService;
+    private final QuestTaskRepository questTaskRepository;
     private final BetSettlementService betSettlementService;
     private final UserRepository userRepository;
     private final EconomyPort economyPort;
@@ -53,6 +53,7 @@ public class DevDataInitializer {
     public void seed() {
         if (cardDefinitionRepository.count() > 0) {
             ensureAdminUser();
+            ensureQuestTasks();
             return;
         }
         log.info("Seeding dev data…");
@@ -82,14 +83,23 @@ public class DevDataInitializer {
             packDropRowRepository.save(new PackDropRow(premium.getId(), c.getId(), weight * 2, c.getRarity()));
         }
 
-        questManagementService.createQuest(new CreateQuestRequest("Подпишись на канал", 200));
-        questManagementService.createQuest(new CreateQuestRequest("Пригласи друга", 500));
+        ensureQuestTasks();
 
         betSettlementService.createEvent(
                 new CreateBettingEventRequest("Кто победит в турнире?", List.of("Команда A", "Команда B")));
 
         ensureAdminUser();
         log.info("Dev seed complete. Admin initData hint: {}", ADMIN_INIT_HINT);
+    }
+
+    private void ensureQuestTasks() {
+        if (questTaskRepository.count() > 0) {
+            return;
+        }
+        questTaskRepository.save(new QuestTaskEntity("Подпишись на канал", 200));
+        questTaskRepository.save(new QuestTaskEntity("Сделай селфи с партнёром", 300));
+        questTaskRepository.save(new QuestTaskEntity("Пригласи друга в бота", 500));
+        log.info("Seeded {} quest tasks for bot", questTaskRepository.count());
     }
 
     private CardDefinition card(String title, CardRarity rarity) {

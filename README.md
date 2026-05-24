@@ -83,33 +83,29 @@ CORS на бэкенде: `application.yml` → `casino.cors` (маска `https
 
 ### Admin panel
 
+Админка встроена в **user-app** (`/admin`) для пользователей с ролью admin. Отдельная `admin-panel` опциональна.
+
 ```
 VITE_API_URL=https://your-backend.example.com
-VITE_ADMIN_INIT_DATA=dev-admin-login-token-2026
 ```
 
-### Квесты в боте (`quest-bot-app`)
+### Квесты в Telegram-боте (`modules/quests`)
 
-Отдельное Spring Boot приложение в `backend/quest-bot-app` (порт **8081**).
-
-```powershell
-cd backend
-gradle :quest-bot-app:bootRun
-```
+Бот встроен в основной backend (`gradle :app:bootRun`). Отдельный `quest-bot-app` больше не нужен.
 
 | Variable | Описание |
 |----------|----------|
-| `QUEST_BOT_TOKEN` | Токен Telegram-бота квестов |
+| `QUEST_BOT_TOKEN` | Токен Telegram-бота квестов (обязателен для запуска бота) |
 | `QUEST_BOT_USERNAME` | Username бота (без @) |
 | `QUEST_BOT_ADMIN_IDS` | Telegram ID админов через запятую |
-| `QUEST_BOT_ADMIN_USERNAMES` | Usernames админов (по умолчанию `admin`) |
-| `CASINO_API_URL` | URL casino backend (по умолчанию `http://localhost:8080`) |
-| `CASINO_INTERNAL_API_KEY` | Ключ internal API (тот же, что `casino.internal.api-key`) |
+| `QUEST_BOT_ADMIN_USERNAMES` | Usernames админов бота (по умолчанию `admin`) |
+| `CASINO_MINI_APP_URL` | URL Mini App для кнопки в боте |
 
-Пользователь идентифицируется по **Telegram username** (обязателен). При `/start` бот регистрирует пользователя в Casino через internal API.  
-После одобрения квеста админом обоим начисляются коины и карточки (1 квест — common, 7 — rare, 15 — legendary между одной парой).
+Пользователь идентифицируется по **Telegram username**. При `/start` создаётся запись в Casino.  
+Шаблоны квестов — в админке Mini App (`/admin/quests`) или в самом боте (админ-панель).  
+После одобрения квеста обоим начисляются коины и карточки (1 / 7 / 15 квестов между парой).
 
-В Mini App страница «Квесты» ведёт в бота: `VITE_QUESTS_BOT_URL=https://t.me/your_bot`.
+В Mini App: `VITE_QUESTS_BOT_URL` и `VITE_QUESTS_BOT_USERNAME`.
 
 ### Идентификация пользователей
 
