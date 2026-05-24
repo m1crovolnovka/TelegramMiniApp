@@ -25,12 +25,12 @@ public class AdminBettingController {
     }
 
     @PostMapping("/events/{eventId}/close")
-    public void close(@PathVariable long eventId) {
+    public void close(@PathVariable("eventId") long eventId) {
         betSettlementService.closeEvent(eventId);
     }
 
     @PostMapping("/events/{eventId}/settle")
-    public void settle(@PathVariable long eventId, @Valid @RequestBody SettleBettingEventRequest body) {
+    public void settle(@PathVariable("eventId") long eventId, @Valid @RequestBody SettleBettingEventRequest body) {
         betSettlementService.settle(eventId, body.winningOptionId());
     }
 }

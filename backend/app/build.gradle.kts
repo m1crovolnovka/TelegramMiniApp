@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":modules:trades"))
     implementation(project(":modules:admin"))
     implementation(project(":modules:notifications"))
+    implementation(project(":quest-bot-app"))
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 

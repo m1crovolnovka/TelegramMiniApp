@@ -24,15 +24,15 @@ public class AdminUserController {
     }
 
     @GetMapping("/{userId}")
-    public AdminUserSummaryResponse get(@PathVariable long userId) {
+    public AdminUserSummaryResponse get(@PathVariable("userId") long userId) {
         return adminUserService.getUser(userId);
     }
 
     @GetMapping("/{userId}/transactions")
     public List<TransactionResponse> transactions(
-            @PathVariable long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "100") int size) {
+            @PathVariable("userId") long userId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "100") int size) {
         return adminUserService.userTransactions(userId, page, size);
     }
 }

@@ -6,6 +6,7 @@ import com.casino.questbot.service.UserService;
 import com.casino.questbot.telegram.EventManagerBot;
 import com.casino.questbot.telegram.TelegramFileFetcher;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Configuration
 @Slf4j
+@ConditionalOnExpression("'${quest-bot.telegram.token:}' != ''")
 public class BotConfig {
 
     @Bean

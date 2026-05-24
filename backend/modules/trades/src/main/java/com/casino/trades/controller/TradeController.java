@@ -31,26 +31,26 @@ public class TradeController {
     @PostMapping("/{tradeId}/items")
     public TradeResponse addItem(
             Authentication authentication,
-            @PathVariable long tradeId,
+            @PathVariable("tradeId") long tradeId,
             @Valid @RequestBody AddTradeItemRequest body) {
         long userId = (Long) authentication.getPrincipal();
         return tradeService.addItem(userId, tradeId, body);
     }
 
     @PostMapping("/{tradeId}/send")
-    public TradeResponse send(Authentication authentication, @PathVariable long tradeId) {
+    public TradeResponse send(Authentication authentication, @PathVariable("tradeId") long tradeId) {
         long userId = (Long) authentication.getPrincipal();
         return tradeService.send(userId, tradeId);
     }
 
     @PostMapping("/{tradeId}/accept")
-    public TradeResponse accept(Authentication authentication, @PathVariable long tradeId) {
+    public TradeResponse accept(Authentication authentication, @PathVariable("tradeId") long tradeId) {
         long userId = (Long) authentication.getPrincipal();
         return tradeService.accept(userId, tradeId);
     }
 
     @PostMapping("/{tradeId}/reject")
-    public void reject(Authentication authentication, @PathVariable long tradeId) {
+    public void reject(Authentication authentication, @PathVariable("tradeId") long tradeId) {
         long userId = (Long) authentication.getPrincipal();
         tradeService.reject(userId, tradeId);
     }
@@ -62,7 +62,7 @@ public class TradeController {
     }
 
     @GetMapping("/{tradeId}")
-    public TradeResponse get(Authentication authentication, @PathVariable long tradeId) {
+    public TradeResponse get(Authentication authentication, @PathVariable("tradeId") long tradeId) {
         long userId = (Long) authentication.getPrincipal();
         return tradeService.get(userId, tradeId);
     }

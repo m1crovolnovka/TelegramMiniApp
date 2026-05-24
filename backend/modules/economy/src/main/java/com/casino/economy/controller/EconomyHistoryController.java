@@ -20,8 +20,8 @@ public class EconomyHistoryController {
     @GetMapping("/history")
     public List<TransactionResponse> history(
             Authentication authentication,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "50") int size) {
         long userId = (Long) authentication.getPrincipal();
         return transactionHistoryService.history(userId, page, Math.min(size, 200));
     }

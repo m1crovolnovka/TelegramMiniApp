@@ -26,12 +26,12 @@ public class AdminQuestController {
     }
 
     @PostMapping("/submissions/{submissionId}/approve")
-    public void approve(@PathVariable long submissionId) {
+    public void approve(@PathVariable("submissionId") long submissionId) {
         questModerationService.approve(submissionId);
     }
 
     @PostMapping("/submissions/{submissionId}/reject")
-    public void reject(@PathVariable long submissionId) {
+    public void reject(@PathVariable("submissionId") long submissionId) {
         questModerationService.reject(submissionId);
     }
 }

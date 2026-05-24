@@ -11,11 +11,12 @@ import { BotQuestsPage } from '../pages/BotQuestsPage';
 import { CollectionPage } from '../pages/CollectionPage';
 import { BetsPage } from '../pages/BetsPage';
 import { LeaderboardPage } from '../pages/LeaderboardPage';
+import { AdminPage } from '../pages/AdminPage';
 
 export default function App() {
   const { user, error, booting, login } = useAuthBootstrap();
 
-  if (booting) return <Loader text="Ð’Ñ…Ð¾Ð´..." />;
+  if (booting) return <Loader text="Âõîä..." />;
   if (error && !user) return <PageError message={error} onRetry={login} />;
   if (!user) return <Loader />;
 
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="quests" element={<BotQuestsPage />} />
         <Route path="bets" element={<BetsPage />} />
         <Route path="leaderboard" element={<LeaderboardPage />} />
+        <Route path="admin" element={<AdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

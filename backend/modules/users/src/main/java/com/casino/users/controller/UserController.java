@@ -44,19 +44,19 @@ public class UserController {
     }
 
     @GetMapping("/by-username/{username}")
-    public PublicUserResponse byUsername(@PathVariable String username) {
+    public PublicUserResponse byUsername(@PathVariable("username") String username) {
         User user = userService.requireByUsername(username);
         return new PublicUserResponse(user.getId(), user.getUsername());
     }
 
     @GetMapping("/{id}")
-    public PublicUserResponse byId(@PathVariable long id) {
+    public PublicUserResponse byId(@PathVariable("id") long id) {
         User user = userService.requireById(id);
         return new PublicUserResponse(user.getId(), user.getUsername());
     }
 
     @GetMapping("/{id}/inventory")
-    public InventoryResponse inventory(@PathVariable long id) {
+    public InventoryResponse inventory(@PathVariable("id") long id) {
         return cardCatalogService.inventory(id);
     }
 }

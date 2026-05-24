@@ -34,12 +34,12 @@ public class AdminCardController {
     }
 
     @PutMapping("/{id}")
-    public CardDefinitionResponse update(@PathVariable long id, @Valid @RequestBody UpdateCardRequest body) {
+    public CardDefinitionResponse update(@PathVariable("id") long id, @Valid @RequestBody UpdateCardRequest body) {
         return adminCardService.update(id, body);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable long id) {
+    public void delete(@PathVariable("id") long id) {
         adminCardService.delete(id);
     }
 }

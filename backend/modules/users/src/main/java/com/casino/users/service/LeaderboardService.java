@@ -1,5 +1,6 @@
 package com.casino.users.service;
 
+import com.casino.cards.service.CollectionService;
 import com.casino.economy.entity.Wallet;
 import com.casino.economy.repository.WalletRepository;
 import com.casino.users.dto.response.LeaderboardEntryResponse;
@@ -21,6 +22,7 @@ public class LeaderboardService {
 
     private final WalletRepository walletRepository;
     private final UserRepository userRepository;
+    private final CollectionService collectionService;
 
     @Transactional(readOnly = true)
     public List<LeaderboardEntryResponse> topByBalance(int limit) {
@@ -35,7 +37,8 @@ public class LeaderboardService {
         for (Wallet w : wallets) {
             User u = users.get(w.getUserId());
             String name = u != null && u.getUsername() != null ? u.getUsername() : "User #" + w.getUserId();
-            result.add(new LeaderboardEntryResponse(rank++, w.getUserId(), name, w.getBalance()));
+            long students = collectionService.countUniqueStudentsOwned(w.getUserId());
+            result.add(new LeaderboardEntryResponse(rank++, w.getUserId(), name, w.getBalance(), students));
         }
         return result;
     }

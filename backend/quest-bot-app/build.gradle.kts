@@ -5,6 +5,11 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":modules:common"))
+    implementation(project(":modules:config"))
+    implementation(project(":modules:users"))
+    implementation(project(":modules:quests"))
+
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")

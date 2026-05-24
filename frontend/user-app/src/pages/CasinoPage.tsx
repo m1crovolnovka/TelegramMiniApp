@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { casinoApi, userApi } from '../shared/api/endpoints';
 import { RouletteWheel } from '../features/casino/RouletteWheel';
 import { SlotMachine } from '../features/casino/SlotMachine';
@@ -80,9 +80,7 @@ export function CasinoPage() {
     setRouletteSpinning(false);
     setBusy(false);
     if (rouletteValue !== undefined) {
-      setResult(
-        `Выпало: ${rouletteValue}. ${roulettePayout && roulettePayout > 0 ? `Выигрыш +${roulettePayout} 🪙` : 'Без выигрыша'}`,
-      );
+      setResult(`Выпало: ${rouletteValue}. ${roulettePayout && roulettePayout > 0 ? `Выигрыш +${roulettePayout} 🪙` : 'Без выигрыша'}`);
       userApi.me().then(setUser);
     }
   };
@@ -92,57 +90,31 @@ export function CasinoPage() {
       <h1 className="text-xl font-bold">Казино</h1>
       <div className="flex gap-2">
         {(['slots', 'roulette'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTab(t)}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium ${tab === t ? 'bg-violet-600' : 'bg-zinc-800'}`}
-          >
+          <button key={t} type="button" onClick={() => setTab(t)} className={`flex-1 rounded-lg py-2 text-sm font-medium ${tab === t ? 'bg-violet-600' : 'bg-zinc-800'}`}>
             {t === 'slots' ? 'Слоты' : 'Рулетка'}
           </button>
         ))}
       </div>
       <label className="block text-sm text-zinc-400">
         Ставка
-        <input
-          type="number"
-          min={1}
-          value={bet}
-          onChange={(e) => setBet(Number(e.target.value))}
-          className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2"
-        />
+        <input type="number" min={1} value={bet} onChange={(e) => setBet(Number(e.target.value))} className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2" />
       </label>
       {error && <PageError message={error} />}
       {tab === 'slots' ? (
         <div className="space-y-4">
           <SlotMachine spinning={slotSpinning} resultSymbols={slotSymbols} />
-          <Button className="w-full" loading={busy} onClick={spinSlots}>
-            Крутить (3 сек)
-          </Button>
+          <Button className="w-full" loading={busy} onClick={spinSlots}>Крутить</Button>
         </div>
       ) : (
         <div className="space-y-4 pb-10">
-          <RouletteWheel
-            spinning={rouletteSpinning}
-            resultValue={rouletteValue}
-            onSpinEnd={onRouletteEnd}
-          />
+          <RouletteWheel spinning={rouletteSpinning} resultValue={rouletteValue} onSpinEnd={onRouletteEnd} />
+          <div className="text-center text-sm font-semibold text-amber-300 min-h-5">{rouletteValue !== undefined ? `Выпало: ${rouletteValue}` : ''}</div>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="secondary" loading={busy} onClick={() => betRoulette('RED')}>
-              Красное
-            </Button>
-            <Button variant="secondary" loading={busy} onClick={() => betRoulette('BLACK')}>
-              Чёрное
-            </Button>
-            <Button variant="secondary" loading={busy} onClick={() => betRoulette('ODD')}>
-              Нечёт
-            </Button>
-            <Button variant="secondary" loading={busy} onClick={() => betRoulette('EVEN')}>
-              Чёт
-            </Button>
-            <Button variant="secondary" loading={busy} onClick={() => betRoulette('NUMBER', 0)}>
-              0 (zero)
-            </Button>
+            <Button variant="secondary" loading={busy} onClick={() => betRoulette('RED')}>Красное</Button>
+            <Button variant="secondary" loading={busy} onClick={() => betRoulette('BLACK')}>Чёрное</Button>
+            <Button variant="secondary" loading={busy} onClick={() => betRoulette('ODD')}>Нечёт</Button>
+            <Button variant="secondary" loading={busy} onClick={() => betRoulette('EVEN')}>Чёт</Button>
+            <Button variant="secondary" loading={busy} onClick={() => betRoulette('NUMBER', 0)}>0 (zero)</Button>
           </div>
           <div className="max-h-40 overflow-y-auto rounded-lg border border-zinc-700 p-2">
             <p className="mb-2 text-xs text-zinc-400">Ставка на число (0–36)</p>
@@ -153,16 +125,8 @@ export function CasinoPage() {
                   type="button"
                   disabled={busy}
                   onClick={() => betRoulette('NUMBER', n)}
-                  className={`rounded px-1 py-1 text-xs font-semibold ${
-                    n === 0
-                      ? 'bg-green-700'
-                      : [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36].includes(n)
-                        ? 'bg-red-800'
-                        : 'bg-zinc-800'
-                  }`}
-                >
-                  {n}
-                </button>
+                  className={`rounded px-1 py-1 text-xs font-semibold ${n === 0 ? 'bg-green-700' : [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(n) ? 'bg-red-800' : 'bg-zinc-800'}`}
+                >{n}</button>
               ))}
             </div>
           </div>

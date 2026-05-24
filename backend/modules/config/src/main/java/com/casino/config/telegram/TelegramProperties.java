@@ -10,4 +10,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class TelegramProperties {
 
     private String botToken = "";
+    private String botUsername = "";
+    /** HTTPS URL of Telegram Mini App (Casino). */
+    private String miniAppUrl = "";
+    /** Comma-separated Telegram user IDs with quest-bot admin rights. */
+    private String questAdminIds = "";
+    /** Comma-separated usernames for quest-bot admin (without @). */
+    private String questAdminUsernames = "admin";
 }

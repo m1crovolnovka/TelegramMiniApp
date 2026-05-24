@@ -1,6 +1,7 @@
 package com.casino.admin.service;
 
 import com.casino.admin.dto.response.AdminUserSummaryResponse;
+import com.casino.cards.service.CollectionService;
 import com.casino.economy.api.EconomyPort;
 import com.casino.economy.dto.response.TransactionResponse;
 import com.casino.economy.service.TransactionHistoryService;
@@ -18,29 +19,32 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final EconomyPort economyPort;
     private final TransactionHistoryService transactionHistoryService;
+    private final CollectionService collectionService;
 
     @Transactional(readOnly = true)
     public List<AdminUserSummaryResponse> listUsers() {
         return userRepository.findAll().stream()
-                .map(
-                        u ->
-                                new AdminUserSummaryResponse(
-                                        u.getId(),
-                                        u.getUsername(),
-                                        u.getTelegramId(),
-                                        economyPort.getBalance(u.getId())))
+                .map(this::toSummary)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public AdminUserSummaryResponse getUser(long userId) {
         User u = userRepository.findById(userId).orElseThrow();
-        return new AdminUserSummaryResponse(
-                u.getId(), u.getUsername(), u.getTelegramId(), economyPort.getBalance(u.getId()));
+        return toSummary(u);
     }
 
     @Transactional(readOnly = true)
     public List<TransactionResponse> userTransactions(long userId, int page, int size) {
         return transactionHistoryService.history(userId, page, size);
+    }
+
+    private AdminUserSummaryResponse toSummary(User u) {
+        return new AdminUserSummaryResponse(
+                u.getId(),
+                u.getUsername(),
+                u.getTelegramId() != null ? u.getTelegramId() : 0L,
+                economyPort.getBalance(u.getId()),
+                collectionService.countUniqueStudentsOwned(u.getId()));
     }
 }
