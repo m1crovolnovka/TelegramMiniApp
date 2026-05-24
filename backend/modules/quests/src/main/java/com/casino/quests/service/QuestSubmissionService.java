@@ -30,7 +30,7 @@ public class QuestSubmissionService {
     public QuestSubmissionResponse submit(long userId, SubmitQuestRequest request) {
         Quest quest = questRepository.findById(request.questId()).orElseThrow(QuestNotFoundException::new);
         if (quest.getQuestStatus() != QuestStatus.ACTIVE) {
-            throw new BusinessException(ErrorCode.CONFLICT, "Quest is not active");
+            throw new BusinessException(ErrorCode.CONFLICT, "Quest is not active!");
         }
         if (questSubmissionRepository.existsByQuestIdAndUserIdAndSubmissionStatus(
                 request.questId(), userId, QuestSubmissionStatus.PENDING)) {
