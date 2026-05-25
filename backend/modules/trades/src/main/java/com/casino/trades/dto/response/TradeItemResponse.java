@@ -1,6 +1,7 @@
 package com.casino.trades.dto.response;
 
 public record TradeItemResponse(
+        long id,
         long fromUserId,
         String fromUsername,
         Long cardDefinitionId,

@@ -81,7 +81,11 @@ export const bettingApi = {
 };
 
 export const tradesApi = {
+  participants: (limit = 80) =>
+    api.get<PublicUser[]>(`/api/trades/participants`, { params: { limit } }).then((r) => r.data),
   create: (partnerUsername: string) => api.post<Trade>('/api/trades', { partnerUsername }).then((r) => r.data),
+  removeItem: (tradeId: number, itemId: number) =>
+    api.delete<Trade>(`/api/trades/${tradeId}/items/${itemId}`).then((r) => r.data),
   addCard: (tradeId: number, cardDefinitionId: number, quantity = 1, fromUserId?: number) =>
     api.post<Trade>(`/api/trades/${tradeId}/items`, { cardDefinitionId, quantity, ...(fromUserId != null ? { fromUserId } : {}) }).then((r) => r.data),
   addCoins: (tradeId: number, coinsAmount: number) =>

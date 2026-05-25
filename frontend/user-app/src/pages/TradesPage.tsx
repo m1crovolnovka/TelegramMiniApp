@@ -10,12 +10,6 @@ function itemsFromUser(trade: Trade, userId: number): TradeItem[] {
   return trade.items.filter((it) => it.fromUserId === userId);
 }
 
-function cardInTrade(trade: Trade, cardId: number, fromUserId: number): boolean {
-  return trade.items.some(
-    (it) => it.fromUserId === fromUserId && it.cardDefinitionId === cardId && (it.quantity ?? 0) > 0,
-  );
-}
-
 function coinsFromUser(trade: Trade, userId: number): number {
   return trade.items
     .filter((it) => it.fromUserId === userId && it.coinsAmount)
@@ -125,6 +119,7 @@ export function TradesPage() {
   const [partnerInv, setPartnerInv] = useState<InventoryItem[]>([]);
   const [trade, setTrade] = useState<Trade | null>(null);
   const [history, setHistory] = useState<Trade[]>([]);
+  const [participants, setParticipants] = useState<PublicUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [coinOffer, setCoinOffer] = useState('');
@@ -140,7 +135,24 @@ export function TradesPage() {
 
   useEffect(() => {
     loadHistory();
+    tradesApi.participants().then(setParticipants).catch(() => {});
   }, [loadHistory]);
+
+  const selectParticipant = async (u: PublicUser) => {
+    if (!u.username) return;
+    setPartnerUsername(u.username);
+    setLoading(true);
+    setError(null);
+    try {
+      const inv = await userApi.inventory(u.id);
+      setPartner(u);
+      setPartnerInv(inv.items);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Ошибка');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const lookupPartner = async () => {
     const username = partnerUsername.trim().replace(/^@/, '');
@@ -191,15 +203,31 @@ export function TradesPage() {
     if (partner) await refreshInventories(partner);
   };
 
-  const addPartnerCard = async (cardId: number) => {
+  const findTradeItem = (fromUserId: number, cardId: number) =>
+    trade?.items.find((it) => it.fromUserId === fromUserId && it.cardDefinitionId === cardId);
+
+  const removeTradeItem = async (itemId: number) => {
+    if (!trade) return;
+    await refreshTrade(await tradesApi.removeItem(trade.id, itemId));
+  };
+
+  const togglePartnerCard = async (cardId: number) => {
     if (!trade || !partner || trade.status !== 'DRAFT') return;
-    if (cardInTrade(trade, cardId, partner.id)) return;
+    const existing = findTradeItem(partner.id, cardId);
+    if (existing) {
+      await removeTradeItem(existing.id);
+      return;
+    }
     await refreshTrade(await tradesApi.addCard(trade.id, cardId, 1, partner.id));
   };
 
-  const addMyCard = async (cardId: number) => {
+  const toggleMyCard = async (cardId: number) => {
     if (!trade || !me || trade.status !== 'DRAFT') return;
-    if (cardInTrade(trade, cardId, me.id)) return;
+    const existing = findTradeItem(me.id, cardId);
+    if (existing) {
+      await removeTradeItem(existing.id);
+      return;
+    }
     await refreshTrade(await tradesApi.addCard(trade.id, cardId, 1, me.id));
   };
 
@@ -301,9 +329,31 @@ export function TradesPage() {
         </section>
       )}
 
+      {!trade && participants.length > 0 && (
+        <section className="space-y-2 rounded-xl bg-zinc-800/80 p-4">
+          <p className="text-sm font-medium text-zinc-300">Участники</p>
+          <div className="flex flex-wrap gap-2">
+            {participants.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                onClick={() => selectParticipant(u)}
+                className={`rounded-lg px-3 py-1.5 text-sm transition ${
+                  partner?.id === u.id
+                    ? 'bg-violet-600 text-white'
+                    : 'bg-zinc-700 text-zinc-200 hover:bg-zinc-600'
+                }`}
+              >
+                @{u.username ?? u.id}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       {!trade && (
         <section className="space-y-3 rounded-xl bg-zinc-800/80 p-4">
-          <p className="text-sm text-zinc-400">Username партнёра в Telegram</p>
+          <p className="text-sm text-zinc-400">Или введите username партнёра</p>
           <div className="flex gap-2">
             <input
               type="text"
@@ -368,17 +418,17 @@ export function TradesPage() {
           )}
 
           <InventoryPicker
-            label="Ваш инвентарь — нажмите, чтобы отдать"
+            label="Ваш инвентарь — нажмите, чтобы добавить или убрать"
             items={myInv}
             selectedCardIds={mySelectedCards}
-            onPick={(c) => addMyCard(c.cardDefinitionId)}
+            onPick={(c) => toggleMyCard(c.cardDefinitionId)}
           />
 
           <InventoryPicker
-            label={`Инвентарь ${partnerLabel} — нажмите, чтобы запросить`}
+            label={`Инвентарь ${partnerLabel} — нажмите, чтобы запросить или убрать`}
             items={partnerInv}
             selectedCardIds={theirSelectedCards}
-            onPick={(c) => addPartnerCard(c.cardDefinitionId)}
+            onPick={(c) => togglePartnerCard(c.cardDefinitionId)}
           />
 
           <div className="flex gap-2 border-t border-zinc-700 pt-3">

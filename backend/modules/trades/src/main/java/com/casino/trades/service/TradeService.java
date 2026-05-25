@@ -12,8 +12,14 @@ import com.casino.trades.exception.TradeException;
 import com.casino.trades.mapper.TradeMapper;
 import com.casino.trades.repository.TradeItemRepository;
 import com.casino.trades.repository.TradeRepository;
+import com.casino.users.dto.response.PublicUserResponse;
+import com.casino.users.repository.UserRepository;
 import com.casino.users.service.UserService;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import org.springframework.data.domain.PageRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +35,7 @@ public class TradeService {
     private final UserService userService;
     private final UserCardRepository userCardRepository;
     private final EconomyPort economyPort;
+    private final UserRepository userRepository;
 
     @Transactional
     public TradeResponse create(long initiatorUserId, CreateTradeRequest req) {
@@ -91,6 +98,24 @@ public class TradeService {
     }
 
     @Transactional
+    public TradeResponse removeItem(long authUserId, long tradeId, long itemId) {
+        Trade trade = tradeRepository.lockById(tradeId).orElseThrow(() -> new TradeException("Not found"));
+        if (trade.getStatus() != TradeStatus.DRAFT) {
+            throw new TradeException("Trade is not editable");
+        }
+        if (authUserId != trade.getInitiatorUserId() && authUserId != trade.getPartnerUserId()) {
+            throw new TradeException("Forbidden");
+        }
+        TradeItem item =
+                tradeItemRepository
+                        .findById(itemId)
+                        .filter(i -> i.getTradeId().equals(tradeId))
+                        .orElseThrow(() -> new TradeException("Item not found"));
+        tradeItemRepository.delete(item);
+        return tradeMapper.toResponse(trade);
+    }
+
+    @Transactional
     public TradeResponse send(long initiatorUserId, long tradeId) {
         Trade trade = tradeRepository.lockById(tradeId).orElseThrow(() -> new TradeException("Not found"));
         if (!trade.getInitiatorUserId().equals(initiatorUserId)) {
@@ -133,6 +158,38 @@ public class TradeService {
         return tradeRepository.findByInitiatorUserIdOrPartnerUserIdOrderByIdDesc(userId, userId).stream()
                 .map(tradeMapper::toResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PublicUserResponse> participantSuggestions(long userId, int limit) {
+        Set<Long> ordered = new LinkedHashSet<>();
+        tradeRepository
+                .findByInitiatorUserIdOrPartnerUserIdOrderByIdDesc(userId, userId)
+                .forEach(
+                        t -> {
+                            long other =
+                                    t.getInitiatorUserId().equals(userId)
+                                            ? t.getPartnerUserId()
+                                            : t.getInitiatorUserId();
+                            ordered.add(other);
+                        });
+        userRepository
+                .findByIdNotAndUsernameIsNotNullOrderByUsernameAsc(userId, PageRequest.of(0, limit))
+                .forEach(u -> ordered.add(u.getId()));
+
+        List<PublicUserResponse> result = new ArrayList<>();
+        for (Long id : ordered) {
+            if (result.size() >= limit) {
+                break;
+            }
+            userRepository
+                    .findById(id)
+                    .ifPresent(
+                            u ->
+                                    result.add(
+                                            new PublicUserResponse(u.getId(), u.getUsername())));
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)

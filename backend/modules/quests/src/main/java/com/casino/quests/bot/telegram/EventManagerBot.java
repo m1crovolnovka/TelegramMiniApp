@@ -314,7 +314,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
         UserEntity other = a.other(me);
         sendText(chatId, BotMessages.PROOF_SENT);
         sendText(other.getTelegramChatId(), BotMessages.PARTNER_SENT_PROOF.formatted(me.getUsername()));
-        sendText(other.getTelegramChatId(), BotMessages.PARTNER_PROOF_FORWARD);
+        sendText(other.getTelegramChatId(), BotMessages.PARTNER_PROOF_FORWARD.formatted(me.getUsername()));
         sendProofMedia(other.getTelegramChatId(), a);
         if (!a.isAdminNotified()) {
             notifyAdminsAboutPending(a);

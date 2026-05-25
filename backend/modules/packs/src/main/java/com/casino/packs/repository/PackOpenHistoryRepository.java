@@ -12,4 +12,6 @@ public interface PackOpenHistoryRepository extends JpaRepository<PackOpenHistory
     Optional<PackOpenHistory> findByUserIdAndIdempotencyKey(long userId, String idempotencyKey);
 
     List<PackOpenHistory> findByUserIdOrderByIdDesc(long userId);
+
+    List<PackOpenHistory> findByUserIdAndIdempotencyKeyStartingWith(long userId, String prefix);
 }

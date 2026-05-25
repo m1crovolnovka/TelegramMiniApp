@@ -61,14 +61,18 @@ public class QuestService {
             return CreateQuestResult.fail("В базе нет заданий. Админ должен добавить квесты.");
         }
 
-        Set<Long> usedByInitiator = new HashSet<>(assignments.findTaskIdsEverUsedByUser(initiator));
-        Set<Long> usedByPartner = new HashSet<>(assignments.findTaskIdsEverUsedByUser(partner));
+        Set<Long> completedByInitiator = new HashSet<>(assignments.findTaskIdsApprovedByUser(initiator));
+        Set<Long> completedByPartner = new HashSet<>(assignments.findTaskIdsApprovedByUser(partner));
         List<QuestTaskEntity> available =
                 candidates.stream()
-                        .filter(t -> !usedByInitiator.contains(t.getId()) && !usedByPartner.contains(t.getId()))
+                        .filter(
+                                t ->
+                                        !completedByInitiator.contains(t.getId())
+                                                && !completedByPartner.contains(t.getId()))
                         .toList();
         if (available.isEmpty()) {
-            return CreateQuestResult.fail("Для вашей пары больше нет уникальных заданий.");
+            return CreateQuestResult.fail(
+                    "Нет доступных заданий: вы или партнёр уже выполнили все варианты из базы.");
         }
 
         QuestTaskEntity chosen = available.get(ThreadLocalRandom.current().nextInt(available.size()));

@@ -48,15 +48,26 @@ export interface CollectionProgress {
   byRarity: { commonOwned: number; rareOwned: number; legendaryOwned: number };
 }
 
-export interface Pack { id: number; name: string; priceCoins: number }
+export interface Pack {
+  id: number;
+  name: string;
+  priceCoins: number;
+  packKind: 'SINGLE' | 'BUNDLE';
+  bundleSummary: string | null;
+}
 export interface DroppedCard { cardDefinitionId: number; title: string; rarity: CardRarity; imageUrl: string | null }
-export interface OpenPackResponse { droppedCard: DroppedCard }
+export interface OpenPackResponse {
+  packKind: 'SINGLE' | 'BUNDLE';
+  droppedCard: DroppedCard;
+  droppedCards: DroppedCard[];
+}
 export interface PackHistoryItem { id: number; packId: number; droppedCard: DroppedCard; openedAt: string }
 export interface Quest { id: number; title: string; rewardCoins: number; status: QuestStatus }
 export interface QuestSubmission { id: number; questId: number; status: SubmissionStatus; proofText: string }
 export interface BettingOption { id: number; label: string; totalStakeCoins: number; winning: boolean }
 export interface BettingEvent { id: number; title: string; status: EventStatus; options: BettingOption[] }
 export interface TradeItem {
+  id: number;
   fromUserId: number;
   fromUsername: string | null;
   cardDefinitionId: number | null;

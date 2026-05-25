@@ -50,6 +50,7 @@ public class TradeMapper {
                             .orElse(null);
         }
         return new TradeItemResponse(
+                it.getId(),
                 it.getFromUserId(),
                 fromUsername,
                 it.getCardDefinitionId(),

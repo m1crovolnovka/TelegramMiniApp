@@ -1,3 +1,6 @@
 package com.casino.packs.dto.response;
 
-public record OpenPackResponse(DroppedCardResponse droppedCard) {}
+import java.util.List;
+
+public record OpenPackResponse(
+        String packKind, DroppedCardResponse droppedCard, List<DroppedCardResponse> droppedCards) {}

@@ -8,9 +8,13 @@ import com.casino.cards.repository.CardDefinitionRepository;
 import com.casino.economy.api.EconomyPort;
 import com.casino.economy.entity.TransactionType;
 import com.casino.packs.entity.Pack;
+import com.casino.packs.entity.PackBundleSlot;
 import com.casino.packs.entity.PackDropRow;
+import com.casino.packs.entity.PackKind;
+import com.casino.packs.repository.PackBundleSlotRepository;
 import com.casino.packs.repository.PackDropRowRepository;
 import com.casino.packs.repository.PackRepository;
+import com.casino.packs.service.DropCalculationService;
 import com.casino.quests.bot.entity.QuestTaskEntity;
 import com.casino.quests.bot.repo.QuestTaskRepository;
 import com.casino.auth.integration.telegram.TelegramInitDataValidator;
@@ -41,6 +45,8 @@ public class DevDataInitializer {
     private final CardDefinitionRepository cardDefinitionRepository;
     private final PackRepository packRepository;
     private final PackDropRowRepository packDropRowRepository;
+    private final PackBundleSlotRepository packBundleSlotRepository;
+    private final DropCalculationService dropCalculationService;
     private final QuestTaskRepository questTaskRepository;
     private final BetSettlementService betSettlementService;
     private final UserRepository userRepository;
@@ -55,6 +61,8 @@ public class DevDataInitializer {
             ensureAdminUser();
             ensureQuestTasks();
             ensurePackDropWeights();
+            dropCalculationService.syncDropRowsForSinglePacks();
+            ensureBundlePacks();
             return;
         }
         log.info("Seeding dev data…");
@@ -80,6 +88,7 @@ public class DevDataInitializer {
                     new PackDropRow(premium.getId(), c.getId(), premiumWeight(c.getRarity()), c.getRarity()));
         }
 
+        ensureBundlePacks();
         ensureQuestTasks();
 
         betSettlementService.createEvent(
@@ -88,6 +97,41 @@ public class DevDataInitializer {
         ensureAdminUser();
         log.info("Dev seed complete. Admin initData hint: {}", ADMIN_INIT_HINT);
     }
+
+    private void ensureBundlePacks() {
+        seedBundlePack("Набор «Микс»", 2800, List.of(
+                new SlotDef(CardRarity.COMMON, 4),
+                new SlotDef(CardRarity.RARE, 2),
+                new SlotDef(CardRarity.LEGENDARY, 1)));
+        seedBundlePack("Набор «Обычный»", 1200, List.of(new SlotDef(CardRarity.COMMON, 5)));
+        seedBundlePack("Набор «Редкий»", 1700, List.of(new SlotDef(CardRarity.RARE, 3)));
+        ensureBundleDropPools();
+    }
+
+    private void seedBundlePack(String name, long price, List<SlotDef> slots) {
+        Pack existing =
+                packRepository.findAll().stream().filter(p -> name.equals(p.getName())).findFirst().orElse(null);
+        Pack pack;
+        if (existing == null) {
+            pack = packRepository.save(new Pack(name, price, PackKind.BUNDLE));
+        } else {
+            pack = existing;
+            pack.setPackKind(PackKind.BUNDLE);
+            pack.setPriceCoins(price);
+            packRepository.save(pack);
+            packBundleSlotRepository.deleteByPackId(pack.getId());
+        }
+        for (SlotDef slot : slots) {
+            packBundleSlotRepository.save(new PackBundleSlot(pack.getId(), slot.rarity(), slot.count()));
+        }
+    }
+
+    /** Bundle rolls use the same rarity pools as single packs — ensure all single packs have full catalog rows. */
+    private void ensureBundleDropPools() {
+        dropCalculationService.syncDropRowsForSinglePacks();
+    }
+
+    private record SlotDef(CardRarity rarity, int count) {}
 
     private static int starterWeight(CardRarity rarity) {
         return switch (rarity) {
@@ -107,6 +151,9 @@ public class DevDataInitializer {
 
     private void ensurePackDropWeights() {
         packRepository.findAll().forEach(pack -> {
+            if (pack.getPackKind() == PackKind.BUNDLE) {
+                return;
+            }
             boolean premium =
                     pack.getName().toLowerCase().contains("премиум")
                             || pack.getName().toLowerCase().contains("premium")

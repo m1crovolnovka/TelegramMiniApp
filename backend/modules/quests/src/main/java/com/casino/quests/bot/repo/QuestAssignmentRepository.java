@@ -29,9 +29,9 @@ public interface QuestAssignmentRepository extends JpaRepository<QuestAssignment
     @Query(
             """
             select distinct a.task.id from QuestAssignmentEntity a
-            where a.userA = :user or a.userB = :user
+            where (a.userA = :user or a.userB = :user) and a.status = com.casino.quests.bot.entity.TaskStatus.APPROVED
             """)
-    Collection<Long> findTaskIdsEverUsedByUser(@Param("user") UserEntity user);
+    Collection<Long> findTaskIdsApprovedByUser(@Param("user") UserEntity user);
 
     long countByStatus(TaskStatus status);
 
