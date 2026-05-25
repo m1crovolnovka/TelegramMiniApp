@@ -1,13 +1,14 @@
 package com.casino.quests.bot.telegram;
 
+import com.casino.quests.bot.BotMessages;
 import com.casino.quests.bot.entity.ProofType;
 import com.casino.quests.bot.entity.QuestAssignmentEntity;
 import com.casino.quests.bot.entity.QuestTaskEntity;
 import com.casino.quests.bot.entity.TaskStatus;
 import com.casino.quests.bot.entity.UserEntity;
 import com.casino.quests.bot.service.AdminService;
-import com.casino.quests.bot.service.QuestService;
 import com.casino.quests.bot.service.BotUserService;
+import com.casino.quests.bot.service.QuestService;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.Result;
@@ -48,6 +49,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class EventManagerBot extends TelegramLongPollingBot {
@@ -102,9 +104,9 @@ public class EventManagerBot extends TelegramLongPollingBot {
                     SetMyCommands.builder()
                             .commands(
                                     List.of(
-                                            new BotCommand("/start", "Начало"),
-                                            new BotCommand("/menu", "Меню"),
-                                            new BotCommand("/admin", "Админ")))
+                                            new BotCommand("/start", BotMessages.CMD_START_DESC),
+                                            new BotCommand("/menu", BotMessages.CMD_MENU_DESC),
+                                            new BotCommand("/admin", BotMessages.CMD_ADMIN_DESC)))
                             .build());
         } catch (TelegramApiException e) {
             log.warn("Failed to set commands", e);
@@ -132,7 +134,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
         User from = message.getFrom();
         String tgUsername = from.getUserName();
         if (tgUsername == null || tgUsername.isBlank()) {
-            sendText(chatId, "Р—Р°РґР°Р№С‚Рµ Telegram username РІ РЅР°СЃС‚СЂРѕР№РєР°С… Рё РїРѕРІС‚РѕСЂРёС‚Рµ /start.");
+            sendText(chatId, BotMessages.NEED_USERNAME);
             return;
         }
 
@@ -168,46 +170,46 @@ public class EventManagerBot extends TelegramLongPollingBot {
             sendMainMenu(chatId, adminService.isAdmin(from.getId(), tgUsername));
             return;
         }
-        if ("/admin".equalsIgnoreCase(text) || "рџ‘‘ РђРґРјРёРЅ-РїР°РЅРµР»СЊ".equals(text)) {
+        if ("/admin".equalsIgnoreCase(text) || BotMessages.BTN_ADMIN.equals(text)) {
             if (adminService.isAdmin(from.getId(), tgUsername)) {
                 sendAdminMenu(chatId);
             } else {
-                sendText(chatId, "РќРµС‚ РїСЂР°РІ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°.");
+                sendText(chatId, BotMessages.NO_ADMIN_RIGHTS);
             }
             return;
         }
 
         switch (text) {
-            case "рџ“· РћС‚РїСЂР°РІРёС‚СЊ QR" -> {
+            case BotMessages.BTN_QR -> {
                 if (sess.isAwaitingProof()) {
-                    sendText(chatId, "РЎРЅР°С‡Р°Р»Р° Р·Р°РІРµСЂС€РёС‚Рµ С‚РµРєСѓС‰РµРµ Р·Р°РґР°РЅРёРµ РёР»Рё РѕС‚РєР°Р¶РёС‚РµСЃСЊ.");
+                    sendText(chatId, BotMessages.FINISH_OR_CANCEL_FIRST);
                     return;
                 }
                 sess.setAwaitingQr(true);
-                sendText(chatId, "РћС‚РїСЂР°РІСЊС‚Рµ С„РѕС‚Рѕ QR СЃ username СѓС‡Р°СЃС‚РЅРёРєР° (РЅР°РїСЂРёРјРµСЂ @someuser).");
+                sendText(chatId, BotMessages.SEND_QR_PHOTO);
             }
-            case "рџЋІ Р—Р°РґР°РЅРёРµ СЃРѕ СЃР»СѓС‡Р°Р№РЅС‹Рј С‡РµР»РѕРІРµРєРѕРј" -> startRandomQuest(me, chatId);
-            case "вќЊ РћС‚РєР°Р·Р°С‚СЊСЃСЏ РѕС‚ Р·Р°РґР°РЅРёСЏ" -> cancelAssignment(me, chatId);
+            case BotMessages.BTN_RANDOM -> startRandomQuest(me, chatId);
+            case BotMessages.BTN_CANCEL -> cancelAssignment(me, chatId);
             default -> {
                 if (sess.isAwaitingNewTaskText()) {
                     sess.setNewTaskText(text);
                     sess.setAwaitingNewTaskText(false);
                     sess.setAwaitingNewTaskReward(true);
-                    sendText(chatId, "РЈРєР°Р¶РёС‚Рµ РЅР°РіСЂР°РґСѓ РІ РєРѕРёРЅР°С… (С‡РёСЃР»Рѕ) Р·Р° СЌС‚Рѕ Р·Р°РґР°РЅРёРµ:");
+                    sendText(chatId, BotMessages.ENTER_REWARD_COINS);
                 } else if (sess.isAwaitingNewTaskReward()) {
                     try {
                         long reward = Long.parseLong(text.trim());
                         adminService.addNewTask(sess.getNewTaskText(), reward);
                         sess.setAwaitingNewTaskReward(false);
                         sess.setNewTaskText(null);
-                        sendText(chatId, "вњ… РљРІРµСЃС‚ РґРѕР±Р°РІР»РµРЅ. РќР°РіСЂР°РґР°: " + reward + " рџЄ™");
+                        sendText(chatId, BotMessages.QUEST_ADDED.formatted(reward));
                     } catch (NumberFormatException e) {
-                        sendText(chatId, "Р’РІРµРґРёС‚Рµ С‡РёСЃР»Рѕ РєРѕРёРЅРѕРІ.");
+                        sendText(chatId, BotMessages.ENTER_NUMBER);
                     }
                 } else if (sess.isAwaitingProof()) {
-                    sendText(chatId, "РџСЂРёС€Р»РёС‚Рµ С„РѕС‚Рѕ РёР»Рё РІРёРґРµРѕ РєР°Рє РґРѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ.");
+                    sendText(chatId, BotMessages.SEND_PROOF_MEDIA);
                 } else {
-                    sendText(chatId, "РСЃРїРѕР»СЊР·СѓР№С‚Рµ /menu.");
+                    sendText(chatId, BotMessages.USE_MENU);
                 }
             }
         }
@@ -215,7 +217,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
 
     private void startRandomQuest(UserEntity me, long chatId) throws TelegramApiException {
         if (questService.findActiveForUser(me).isPresent()) {
-            sendText(chatId, "РЈ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ Р°РєС‚РёРІРЅРѕРµ Р·Р°РґР°РЅРёРµ.");
+            sendText(chatId, BotMessages.ALREADY_HAS_QUEST);
             return;
         }
         List<UserEntity> candidates =
@@ -224,7 +226,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
                         .filter(u -> questService.findActiveForUser(u).isEmpty())
                         .toList();
         if (candidates.isEmpty()) {
-            sendText(chatId, "РќРµС‚ СЃРІРѕР±РѕРґРЅС‹С… СѓС‡Р°СЃС‚РЅРёРєРѕРІ.");
+            sendText(chatId, BotMessages.NO_FREE_PARTNERS);
             return;
         }
         UserEntity partner = candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
@@ -241,18 +243,18 @@ public class EventManagerBot extends TelegramLongPollingBot {
         QuestAssignmentEntity a = res.assignment();
         String info = questText(a);
         sendText(chatId, info);
-        sendText(partner.getTelegramChatId(), "Р’Р°Рј РЅР°Р·РЅР°С‡РµРЅРѕ Р·Р°РґР°РЅРёРµ!\n\n" + info);
+        sendText(partner.getTelegramChatId(), BotMessages.PARTNER_ASSIGNED.formatted(info));
     }
 
     private void cancelAssignment(UserEntity me, long chatId) throws TelegramApiException {
         Optional<QuestAssignmentEntity> cancelled = questService.cancelActiveForUser(me);
         if (cancelled.isEmpty()) {
-            sendText(chatId, "РќРµС‚ Р°РєС‚РёРІРЅРѕРіРѕ Р·Р°РґР°РЅРёСЏ.");
+            sendText(chatId, BotMessages.NO_ACTIVE_QUEST);
             return;
         }
         UserEntity other = cancelled.get().other(me);
-        sendText(chatId, "Р—Р°РґР°РЅРёРµ РѕС‚РјРµРЅРµРЅРѕ.");
-        sendText(other.getTelegramChatId(), "РџР°СЂС‚РЅС‘СЂ @" + me.getUsername() + " РѕС‚РјРµРЅРёР» Р·Р°РґР°РЅРёРµ.");
+        sendText(chatId, BotMessages.QUEST_CANCELLED);
+        sendText(other.getTelegramChatId(), BotMessages.PARTNER_CANCELLED.formatted(me.getUsername()));
     }
 
     private void handlePhotoQr(Message message, UserEntity me, UserSession sess, long chatId)
@@ -263,17 +265,17 @@ public class EventManagerBot extends TelegramLongPollingBot {
                         .orElse(message.getPhoto().get(0));
         String decoded = decodeQr(best.getFileId());
         if (decoded == null || decoded.isBlank()) {
-            sendText(chatId, "РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°СЃРїРѕР·РЅР°С‚СЊ QR.");
+            sendText(chatId, BotMessages.QR_DECODE_FAIL);
             return;
         }
         String target = decoded.trim().replace("@", "");
         if (target.equalsIgnoreCase(me.getUsername())) {
-            sendText(chatId, "РќРµР»СЊР·СЏ СЃ СЃРѕР±РѕР№.");
+            sendText(chatId, BotMessages.CANNOT_WITH_SELF);
             return;
         }
         Optional<UserEntity> partner = userService.findByUsername(target);
         if (partner.isEmpty()) {
-            sendText(chatId, "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ @" + target + " РµС‰С‘ РЅРµ Р·Р°РїСѓСЃРєР°Р» Р±РѕС‚Р°.");
+            sendText(chatId, BotMessages.PARTNER_NOT_STARTED.formatted(target));
             return;
         }
         sess.setAwaitingQr(false);
@@ -306,10 +308,8 @@ public class EventManagerBot extends TelegramLongPollingBot {
             return;
         }
         QuestAssignmentEntity a = res.assignment();
-        sendText(chatId, "Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ РѕС‚РїСЂР°РІР»РµРЅРѕ. РћР¶РёРґР°Р№С‚Рµ РїСЂРѕРІРµСЂРєРё Р°РґРјРёРЅРѕРј.");
-        sendText(
-                a.other(me).getTelegramChatId(),
-                "РџР°СЂС‚РЅС‘СЂ @" + me.getUsername() + " РѕС‚РїСЂР°РІРёР» РґРѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ.");
+        sendText(chatId, BotMessages.PROOF_SENT);
+        sendText(a.other(me).getTelegramChatId(), BotMessages.PARTNER_SENT_PROOF.formatted(me.getUsername()));
         if (!a.isAdminNotified()) {
             notifyAdminsAboutPending(a);
             questService.markAdminNotified(a);
@@ -318,17 +318,16 @@ public class EventManagerBot extends TelegramLongPollingBot {
 
     private void notifyAdminsAboutPending(QuestAssignmentEntity a) {
         String text =
-                "Р—Р°РґР°РЅРёРµ РЅР° РїСЂРѕРІРµСЂРєСѓ #%d\n@%s + @%s\nРќР°РіСЂР°РґР°: %d рџЄ™\n%s"
-                        .formatted(
-                                a.getId(),
-                                a.getUserA().getUsername(),
-                                a.getUserB().getUsername(),
-                                a.getTask().getRewardCoins(),
-                                a.getTask().getDescription());
+                BotMessages.PENDING_REVIEW.formatted(
+                        a.getId(),
+                        a.getUserA().getUsername(),
+                        a.getUserB().getUsername(),
+                        a.getTask().getRewardCoins(),
+                        a.getTask().getDescription());
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
-        InlineKeyboardButton approve = new InlineKeyboardButton("вњ… РџРѕРґС‚РІРµСЂРґРёС‚СЊ");
+        InlineKeyboardButton approve = new InlineKeyboardButton(BotMessages.BTN_APPROVE);
         approve.setCallbackData("admin:approve:" + a.getId());
-        InlineKeyboardButton reject = new InlineKeyboardButton("вќЊ РћС‚РєР»РѕРЅРёС‚СЊ");
+        InlineKeyboardButton reject = new InlineKeyboardButton(BotMessages.BTN_REJECT);
         reject.setCallbackData("admin:reject:" + a.getId());
         markup.setKeyboard(List.of(List.of(approve, reject)));
 
@@ -375,14 +374,14 @@ public class EventManagerBot extends TelegramLongPollingBot {
             return;
         }
         if (!adminService.isAdmin(from.getId(), from.getUserName())) {
-            sendText(chatId, "РќРµС‚ РїСЂР°РІ.");
+            sendText(chatId, BotMessages.NO_RIGHTS);
             return;
         }
         String[] parts = data.split(":");
         String action = parts[1];
         if ("start_add_task".equals(action)) {
             session(chatId).setAwaitingNewTaskText(true);
-            sendText(chatId, "Р’РІРµРґРёС‚Рµ С‚РµРєСЃС‚ РЅРѕРІРѕРіРѕ Р·Р°РґР°РЅРёСЏ:");
+            sendText(chatId, BotMessages.ENTER_NEW_TASK);
             clearInlineKeyboard(chatId, message.getMessageId());
             return;
         }
@@ -391,13 +390,12 @@ public class EventManagerBot extends TelegramLongPollingBot {
             if (pending.isPresent()) {
                 sendText(
                         chatId,
-                        "РћР¶РёРґР°РµС‚ #%d: @%s + @%s"
-                                .formatted(
-                                        pending.get().getId(),
-                                        pending.get().getUserA().getUsername(),
-                                        pending.get().getUserB().getUsername()));
+                        BotMessages.PENDING_INFO.formatted(
+                                pending.get().getId(),
+                                pending.get().getUserA().getUsername(),
+                                pending.get().getUserB().getUsername()));
             } else {
-                sendText(chatId, "вњ… Р’СЃРµ Р·Р°РґР°РЅРёСЏ РїСЂРѕРІРµСЂРµРЅС‹.");
+                sendText(chatId, BotMessages.ALL_REVIEWED);
             }
             return;
         }
@@ -424,7 +422,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
                     EditMessageText.builder()
                             .chatId(chatId)
                             .messageId(message.getMessageId())
-                            .text("Р—Р°РґР°РЅРёРµ #" + assignmentId + " СѓР¶Рµ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ.")
+                            .text(BotMessages.ALREADY_HANDLED.formatted(assignmentId))
                             .build());
             return;
         }
@@ -436,8 +434,8 @@ public class EventManagerBot extends TelegramLongPollingBot {
                         .messageId(message.getMessageId())
                         .text(
                                 approved
-                                        ? "вњ… Р—Р°РґР°РЅРёРµ #" + assignmentId + " РїРѕРґС‚РІРµСЂР¶РґРµРЅРѕ."
-                                        : "вќЊ Р—Р°РґР°РЅРёРµ #" + assignmentId + " РѕС‚РєР»РѕРЅРµРЅРѕ.")
+                                        ? BotMessages.APPROVED.formatted(assignmentId)
+                                        : BotMessages.REJECTED.formatted(assignmentId))
                         .build());
         notifyUsersAboutDecision(a, approved);
     }
@@ -445,8 +443,8 @@ public class EventManagerBot extends TelegramLongPollingBot {
     private void notifyUsersAboutDecision(QuestAssignmentEntity a, boolean approved) {
         String text =
                 approved
-                        ? "рџЋ‰ Р—Р°РґР°РЅРёРµ РѕРґРѕР±СЂРµРЅРѕ! +" + a.getTask().getRewardCoins() + " рџЄ™"
-                        : "Р—Р°РґР°РЅРёРµ РѕС‚РєР»РѕРЅРµРЅРѕ.";
+                        ? BotMessages.QUEST_APPROVED_REWARD.formatted(a.getTask().getRewardCoins())
+                        : BotMessages.QUEST_REJECTED;
         for (UserEntity u : List.of(a.getUserA(), a.getUserB())) {
             try {
                 sendText(u.getTelegramChatId(), text);
@@ -459,13 +457,14 @@ public class EventManagerBot extends TelegramLongPollingBot {
     private void sendTasksList(long chatId, int page) throws TelegramApiException {
         Page<QuestTaskEntity> taskPage = adminService.getTasksPage(page, 10);
         if (taskPage.isEmpty()) {
-            sendText(chatId, "РЎРїРёСЃРѕРє РєРІРµСЃС‚РѕРІ РїСѓСЃС‚.");
+            sendText(chatId, BotMessages.QUEST_LIST_EMPTY);
             return;
         }
-        StringBuilder sb = new StringBuilder("рџ“‹ РљРІРµСЃС‚С‹ (СЃС‚СЂ. ").append(page + 1).append(")\n\n");
+        StringBuilder sb = new StringBuilder(BotMessages.QUEST_LIST_HEADER.formatted(page + 1));
         for (QuestTaskEntity task : taskPage) {
-            sb.append("#").append(task.getId()).append(" вЂ” ").append(task.getRewardCoins()).append(" рџЄ™\n");
-            sb.append(task.getDescription()).append("\n\n");
+            sb.append(
+                    BotMessages.QUEST_LIST_ITEM.formatted(
+                            task.getId(), task.getRewardCoins(), task.getDescription()));
         }
         sendText(chatId, sb.toString());
     }
@@ -476,17 +475,16 @@ public class EventManagerBot extends TelegramLongPollingBot {
                 List.of(
                         List.of(
                                 btn(
-                                        "рџ”Ќ РћС‡РµСЂРµРґСЊ ("
-                                                + questService.countByStatus(
-                                                        TaskStatus.COMPLETED_PENDING_REVIEW)
-                                                + ")",
+                                        BotMessages.BTN_QUEUE.formatted(
+                                                questService.countByStatus(
+                                                        TaskStatus.COMPLETED_PENDING_REVIEW)),
                                         "admin:view_pending"),
-                                btn("вћ• Р”РѕР±Р°РІРёС‚СЊ РєРІРµСЃС‚", "admin:start_add_task")),
-                        List.of(btn("рџ“‹ РЎРїРёСЃРѕРє РєРІРµСЃС‚РѕРІ", "admin:list_tasks:0"))));
+                                btn(BotMessages.BTN_ADD_QUEST, "admin:start_add_task")),
+                        List.of(btn(BotMessages.BTN_LIST_QUESTS, "admin:list_tasks:0"))));
         execute(
                 SendMessage.builder()
                         .chatId(chatId)
-                        .text("РђРґРјРёРЅ-РїР°РЅРµР»СЊ РєРІРµСЃС‚РѕРІ")
+                        .text(BotMessages.ADMIN_PANEL_TITLE)
                         .replyMarkup(markup)
                         .build());
     }
@@ -501,14 +499,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
         execute(
                 SendMessage.builder()
                         .chatId(chatId)
-                        .text(
-                                """
-                                Привет! Квест-бот Casino.
-
-                                📷 QR — задание с другом по его username
-                                🎲 Случайный партнёр
-                                После выполнения — фото/видео доказательство
-                                Админ подтверждает, коины и карточки начисляются в Casino.""")
+                        .text(BotMessages.WELCOME)
                         .replyMarkup(mainMenu(isAdmin))
                         .build());
     }
@@ -517,7 +508,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
         execute(
                 SendMessage.builder()
                         .chatId(chatId)
-                        .text("Меню:")
+                        .text(BotMessages.MENU_TITLE)
                         .replyMarkup(mainMenu(isAdmin))
                         .build());
     }
@@ -526,21 +517,21 @@ public class EventManagerBot extends TelegramLongPollingBot {
         List<KeyboardRow> rows = new ArrayList<>();
         if (!miniAppUrl.isBlank()) {
             KeyboardRow webAppRow = new KeyboardRow();
-            KeyboardButton casinoBtn = new KeyboardButton("🎰 Открыть Casino");
-            casinoBtn.setWebApp(new org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo(miniAppUrl));
+            KeyboardButton casinoBtn = new KeyboardButton(BotMessages.BTN_OPEN_CASINO);
+            casinoBtn.setWebApp(new WebAppInfo(miniAppUrl));
             webAppRow.add(casinoBtn);
             rows.add(webAppRow);
         }
         KeyboardRow r1 = new KeyboardRow();
-        r1.add(new KeyboardButton("📷 Отправить QR"));
-        r1.add(new KeyboardButton("🎲 Задание со случайным человеком"));
+        r1.add(new KeyboardButton(BotMessages.BTN_QR));
+        r1.add(new KeyboardButton(BotMessages.BTN_RANDOM));
         rows.add(r1);
         KeyboardRow r2 = new KeyboardRow();
-        r2.add(new KeyboardButton("❌ Отказаться от задания"));
+        r2.add(new KeyboardButton(BotMessages.BTN_CANCEL));
         rows.add(r2);
         if (isAdmin) {
             KeyboardRow admin = new KeyboardRow();
-            admin.add(new KeyboardButton("👑 Админ-панель"));
+            admin.add(new KeyboardButton(BotMessages.BTN_ADMIN));
             rows.add(admin);
         }
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
@@ -550,7 +541,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
     }
 
     private String questText(QuestAssignmentEntity a) {
-        return "Р—Р°РґР°РЅРёРµ:\n" + a.getTask().getDescription() + "\n\nРќР°РіСЂР°РґР°: " + a.getTask().getRewardCoins() + " рџЄ™";
+        return BotMessages.questInfo(a.getTask().getDescription(), a.getTask().getRewardCoins());
     }
 
     private String decodeQr(String fileId) {
@@ -589,4 +580,3 @@ public class EventManagerBot extends TelegramLongPollingBot {
         execute(SendMessage.builder().chatId(chatId).text(text).build());
     }
 }
-

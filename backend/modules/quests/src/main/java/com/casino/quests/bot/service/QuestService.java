@@ -46,18 +46,19 @@ public class QuestService {
     @Transactional
     public CreateQuestResult createQuest(UserEntity initiator, UserEntity partner) {
         if (initiator.getId().equals(partner.getId())) {
-            return CreateQuestResult.fail("РќРµР»СЊР·СЏ СЃРѕР·РґР°С‚СЊ Р·Р°РґР°РЅРёРµ СЃ СЃР°РјРёРј СЃРѕР±РѕР№.");
+            return CreateQuestResult.fail("Нельзя создать задание с самим собой.");
         }
         if (assignments.findActiveForUser(initiator).isPresent()) {
-            return CreateQuestResult.fail("РЈ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ Р°РєС‚РёРІРЅРѕРµ Р·Р°РґР°РЅРёРµ. РЎРЅР°С‡Р°Р»Р° РІС‹РїРѕР»РЅРёС‚Рµ РµРіРѕ РёР»Рё РѕС‚РєР°Р¶РёС‚РµСЃСЊ.");
+            return CreateQuestResult.fail(
+                    "У вас уже есть активное задание. Сначала выполните его или откажитесь.");
         }
         if (assignments.findActiveForUser(partner).isPresent()) {
-            return CreateQuestResult.fail("РЈ РІС‹Р±СЂР°РЅРЅРѕРіРѕ СѓС‡Р°СЃС‚РЅРёРєР° СѓР¶Рµ РµСЃС‚СЊ Р°РєС‚РёРІРЅРѕРµ Р·Р°РґР°РЅРёРµ.");
+            return CreateQuestResult.fail("У выбранного участника уже есть активное задание.");
         }
 
         List<QuestTaskEntity> candidates = tasks.findAll();
         if (candidates.isEmpty()) {
-            return CreateQuestResult.fail("Р’ Р±Р°Р·Рµ РЅРµС‚ Р·Р°РґР°РЅРёР№. РђРґРјРёРЅ РґРѕР»Р¶РµРЅ РґРѕР±Р°РІРёС‚СЊ РєРІРµСЃС‚С‹.");
+            return CreateQuestResult.fail("В базе нет заданий. Админ должен добавить квесты.");
         }
 
         Set<Long> usedByInitiator = new HashSet<>(assignments.findTaskIdsEverUsedByUser(initiator));
@@ -67,7 +68,7 @@ public class QuestService {
                         .filter(t -> !usedByInitiator.contains(t.getId()) && !usedByPartner.contains(t.getId()))
                         .toList();
         if (available.isEmpty()) {
-            return CreateQuestResult.fail("Р”Р»СЏ РІР°С€РµР№ РїР°СЂС‹ Р±РѕР»СЊС€Рµ РЅРµС‚ СѓРЅРёРєР°Р»СЊРЅС‹С… Р·Р°РґР°РЅРёР№.");
+            return CreateQuestResult.fail("Для вашей пары больше нет уникальных заданий.");
         }
 
         QuestTaskEntity chosen = available.get(ThreadLocalRandom.current().nextInt(available.size()));
@@ -79,11 +80,11 @@ public class QuestService {
     public CompleteProofResult submitProof(UserEntity user, String fileId, ProofType type) {
         Optional<QuestAssignmentEntity> activeOpt = assignments.findActiveForUser(user);
         if (activeOpt.isEmpty()) {
-            return CompleteProofResult.fail("РЈ РІР°СЃ РЅРµС‚ Р°РєС‚РёРІРЅРѕРіРѕ Р·Р°РґР°РЅРёСЏ.");
+            return CompleteProofResult.fail("У вас нет активного задания.");
         }
         QuestAssignmentEntity a = activeOpt.get();
         if (a.getStatus() != TaskStatus.ASSIGNED) {
-            return CompleteProofResult.fail("Р­С‚Рѕ Р·Р°РґР°РЅРёРµ СѓР¶Рµ РЅРµ РїСЂРёРЅРёРјР°РµС‚ РґРѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІР°.");
+            return CompleteProofResult.fail("Это задание уже не принимает доказательства.");
         }
         a.setProofFileId(fileId);
         a.setProofType(type);
@@ -170,4 +171,3 @@ public class QuestService {
         }
     }
 }
-
