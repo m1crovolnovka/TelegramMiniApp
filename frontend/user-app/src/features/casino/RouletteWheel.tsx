@@ -8,17 +8,24 @@ export const ROULETTE_WHEEL_ORDER = [
 const RED_NUMBERS = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
 const SEGMENTS = ROULETTE_WHEEL_ORDER.length;
 const SEGMENT_ANGLE = 360 / SEGMENTS;
+const MIN_FULL_SPINS = 6;
+const SPIN_MS = 5200;
 
 function pocketColor(n: number): string {
   if (n === 0) return '#15803d';
   return RED_NUMBERS.has(n) ? '#b91c1c' : '#0f0f14';
 }
 
-function rotationForValue(value: number, extraTurns = 6): number {
+/** Always rotate forward at least MIN_FULL_SPINS full turns, then land on server value. */
+function nextRotation(currentDeg: number, value: number): number {
   const index = ROULETTE_WHEEL_ORDER.indexOf(value as (typeof ROULETTE_WHEEL_ORDER)[number]);
   const safeIndex = index >= 0 ? index : 0;
   const pocketCenter = safeIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-  return extraTurns * 360 + (360 - pocketCenter);
+  const targetMod = (360 - pocketCenter + 360) % 360;
+  const currentMod = ((currentDeg % 360) + 360) % 360;
+  let delta = targetMod - currentMod;
+  if (delta <= 0) delta += 360;
+  return currentDeg + MIN_FULL_SPINS * 360 + delta;
 }
 
 interface Props {
@@ -30,6 +37,7 @@ interface Props {
 
 export function RouletteWheel({ spinning, resultValue, spinToken, onSpinEnd }: Props) {
   const [rotation, setRotation] = useState(0);
+  const rotationRef = useRef(0);
   const lastToken = useRef(0);
 
   const segments = useMemo(
@@ -40,9 +48,14 @@ export function RouletteWheel({ spinning, resultValue, spinToken, onSpinEnd }: P
         const mid = (start + end) / 2;
         const rad = (mid * Math.PI) / 180;
         const labelR = 118;
-        const x = 150 + labelR * Math.cos(rad);
-        const y = 150 + labelR * Math.sin(rad);
-        return { num, i, start, end, x, y, mid };
+        return {
+          num,
+          start,
+          end,
+          x: 150 + labelR * Math.cos(rad),
+          y: 150 + labelR * Math.sin(rad),
+          mid,
+        };
       }),
     [],
   );
@@ -50,34 +63,47 @@ export function RouletteWheel({ spinning, resultValue, spinToken, onSpinEnd }: P
   useEffect(() => {
     if (!spinning || resultValue === undefined || spinToken === lastToken.current) return;
     lastToken.current = spinToken;
-    setRotation(rotationForValue(resultValue));
+    const next = nextRotation(rotationRef.current, resultValue);
+    rotationRef.current = next;
+    setRotation(next);
   }, [spinning, resultValue, spinToken]);
 
   useEffect(() => {
     if (!spinning) return;
-    const t = setTimeout(() => onSpinEnd?.(), 4200);
+    const t = setTimeout(() => onSpinEnd?.(), SPIN_MS);
     return () => clearTimeout(t);
-  }, [spinning, onSpinEnd]);
+  }, [spinning, spinToken, onSpinEnd]);
 
   return (
     <div className="relative mx-auto h-[320px] w-[320px]">
       <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2">
-        <div className="h-0 w-0 border-x-[12px] border-b-[22px] border-x-transparent border-b-amber-400 drop-shadow-lg" />
+        <div className="h-0 w-0 border-x-[14px] border-b-[26px] border-x-transparent border-b-amber-400 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" />
       </div>
 
       <div
-        className="absolute inset-4 rounded-full shadow-[0_0_40px_rgba(251,191,36,0.25)] transition-transform duration-[4200ms] ease-[cubic-bezier(0.15,0.85,0.2,1)]"
-        style={{ transform: `rotate(${rotation}deg)` }}
+        className="absolute inset-4 rounded-full shadow-[0_0_48px_rgba(251,191,36,0.3)] will-change-transform"
+        style={{
+          transform: `rotate(${rotation}deg)`,
+          transition: spinning
+            ? `transform ${SPIN_MS}ms cubic-bezier(0.17, 0.67, 0.12, 0.99)`
+            : 'none',
+        }}
       >
         <svg viewBox="0 0 300 300" className="h-full w-full">
-          <circle cx="150" cy="150" r="148" fill="#1c1917" stroke="#fbbf24" strokeWidth="6" />
+          <defs>
+            <radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#fcd34d" />
+              <stop offset="100%" stopColor="#92400e" />
+            </radialGradient>
+          </defs>
+          <circle cx="150" cy="150" r="148" fill="#1c1917" stroke="#fbbf24" strokeWidth="7" />
           {segments.map(({ num, start, end }) => (
             <path
               key={`${num}-${start}`}
               d={describeArc(150, 150, 140, start, end)}
               fill={pocketColor(num)}
               stroke="#292524"
-              strokeWidth="0.5"
+              strokeWidth="0.6"
             />
           ))}
           {segments.map(({ num, x, y, mid }) => (
@@ -95,12 +121,11 @@ export function RouletteWheel({ spinning, resultValue, spinToken, onSpinEnd }: P
               {num}
             </text>
           ))}
-          <circle cx="150" cy="150" r="36" fill="#b45309" stroke="#fde68a" strokeWidth="3" />
-          <circle cx="150" cy="150" r="28" fill="#92400e" />
+          <circle cx="150" cy="150" r="38" fill="url(#hubGlow)" stroke="#fde68a" strokeWidth="3" />
         </svg>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 rounded-full ring-4 ring-amber-500/40" />
+      <div className="pointer-events-none absolute inset-0 rounded-full ring-4 ring-amber-500/35" />
     </div>
   );
 }

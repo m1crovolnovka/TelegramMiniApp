@@ -56,13 +56,13 @@ public class DropCalculationService {
     }
 
     private static int applyPremiumWeight(int base, CardRarity rarity, boolean premium) {
-        if (!premium || rarity == CardRarity.COMMON) {
+        if (!premium) {
             return base;
         }
         return switch (rarity) {
-            case RARE -> base * 3;
-            case LEGENDARY -> base * 5;
-            default -> base;
+            case COMMON -> base;
+            case RARE -> (int) Math.round(base * 1.35);
+            case LEGENDARY -> base * 2;
         };
     }
 

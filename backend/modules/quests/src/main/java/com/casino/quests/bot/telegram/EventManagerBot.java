@@ -242,8 +242,11 @@ public class EventManagerBot extends TelegramLongPollingBot {
         }
         QuestAssignmentEntity a = res.assignment();
         String info = questText(a);
-        sendText(chatId, info);
-        sendText(partner.getTelegramChatId(), BotMessages.PARTNER_ASSIGNED.formatted(info));
+        sendText(chatId, BotMessages.QUEST_WITH_PARTNER.formatted(partner.getUsername(), info));
+        sendText(
+                partner.getTelegramChatId(),
+                BotMessages.PARTNER_ASSIGNED_DETAILED.formatted(
+                        me.getUsername(), partner.getUsername(), info));
     }
 
     private void cancelAssignment(UserEntity me, long chatId) throws TelegramApiException {
@@ -308,15 +311,18 @@ public class EventManagerBot extends TelegramLongPollingBot {
             return;
         }
         QuestAssignmentEntity a = res.assignment();
+        UserEntity other = a.other(me);
         sendText(chatId, BotMessages.PROOF_SENT);
-        sendText(a.other(me).getTelegramChatId(), BotMessages.PARTNER_SENT_PROOF.formatted(me.getUsername()));
+        sendText(other.getTelegramChatId(), BotMessages.PARTNER_SENT_PROOF.formatted(me.getUsername()));
+        sendText(other.getTelegramChatId(), BotMessages.PARTNER_PROOF_FORWARD);
+        sendProofMedia(other.getTelegramChatId(), a);
         if (!a.isAdminNotified()) {
             notifyAdminsAboutPending(a);
             questService.markAdminNotified(a);
         }
     }
 
-    private void notifyAdminsAboutPending(QuestAssignmentEntity a) {
+    private void sendPendingReviewToAdmin(long adminChatId, QuestAssignmentEntity a) {
         String text =
                 BotMessages.PENDING_REVIEW.formatted(
                         a.getId(),
@@ -330,19 +336,22 @@ public class EventManagerBot extends TelegramLongPollingBot {
         InlineKeyboardButton reject = new InlineKeyboardButton(BotMessages.BTN_REJECT);
         reject.setCallbackData("admin:reject:" + a.getId());
         markup.setKeyboard(List.of(List.of(approve, reject)));
+        try {
+            execute(
+                    SendMessage.builder()
+                            .chatId(adminChatId)
+                            .text(text)
+                            .replyMarkup(markup)
+                            .build());
+            sendProofMedia(adminChatId, a);
+        } catch (TelegramApiException e) {
+            log.warn("Notify admin {}", adminChatId, e);
+        }
+    }
 
+    private void notifyAdminsAboutPending(QuestAssignmentEntity a) {
         for (Long adminChatId : userService.adminChatIds()) {
-            try {
-                execute(
-                        SendMessage.builder()
-                                .chatId(adminChatId)
-                                .text(text)
-                                .replyMarkup(markup)
-                                .build());
-                sendProofMedia(adminChatId, a);
-            } catch (TelegramApiException e) {
-                log.warn("Notify admin {}", adminChatId, e);
-            }
+            sendPendingReviewToAdmin(adminChatId, a);
         }
     }
 
@@ -394,12 +403,7 @@ public class EventManagerBot extends TelegramLongPollingBot {
             if ("view_pending".equals(action)) {
                 Optional<QuestAssignmentEntity> pending = questService.findFirstPending();
                 if (pending.isPresent()) {
-                    sendText(
-                            chatId,
-                            BotMessages.PENDING_INFO.formatted(
-                                    pending.get().getId(),
-                                    pending.get().getUserA().getUsername(),
-                                    pending.get().getUserB().getUsername()));
+                    sendPendingReviewToAdmin(chatId, pending.get());
                 } else {
                     sendText(chatId, BotMessages.ALL_REVIEWED);
                 }

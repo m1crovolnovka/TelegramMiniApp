@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PartnerQuestRewardService {
 
+    private static final int COMMON_MILESTONE = 1;
     private static final int RARE_MILESTONE = 7;
     private static final int LEGENDARY_MILESTONE = 15;
 
@@ -64,6 +65,7 @@ public class PartnerQuestRewardService {
         progress.setCompletedCount(progress.getCompletedCount() + 1);
         progressRepository.save(progress);
 
+        int count = progress.getCompletedCount();
         long reward = req.rewardCoins();
         if (reward > 0) {
             String debitKey = "partner-quest:" + req.externalAssignmentId();
@@ -73,10 +75,12 @@ public class PartnerQuestRewardService {
                     userB.getId(), reward, debitKey + ":b", TransactionType.QUEST_REWARD, "partner_quest");
         }
 
-        grantPartnerCard(userA, userB, CardRarity.COMMON);
-
-        boolean rare = progress.getCompletedCount() == RARE_MILESTONE;
-        boolean legendary = progress.getCompletedCount() == LEGENDARY_MILESTONE;
+        boolean common = count == COMMON_MILESTONE;
+        boolean rare = count == RARE_MILESTONE;
+        boolean legendary = count == LEGENDARY_MILESTONE;
+        if (common) {
+            grantPartnerCard(userA, userB, CardRarity.COMMON);
+        }
         if (rare) {
             grantPartnerCard(userA, userB, CardRarity.RARE);
         }
@@ -84,8 +88,7 @@ public class PartnerQuestRewardService {
             grantPartnerCard(userA, userB, CardRarity.LEGENDARY);
         }
 
-        return new PartnerQuestCompleteResponse(
-                false, progress.getCompletedCount(), rare, legendary);
+        return new PartnerQuestCompleteResponse(false, count, rare, legendary);
     }
 
     private void grantPartnerCard(User owner, User partner, CardRarity rarity) {

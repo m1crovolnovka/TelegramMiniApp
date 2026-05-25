@@ -16,6 +16,14 @@ export function initTelegram() {
 export function getInitData(): string {
   const fromTg = WebApp.initData;
   if (fromTg && fromTg.length > 10) return fromTg;
+
+  const tgUser = WebApp.initDataUnsafe?.user;
+  if (tgUser?.id) {
+    throw new Error(
+      'Не удалось получить данные Telegram. Закройте Mini App и откройте снова из бота.',
+    );
+  }
+
   return import.meta.env.VITE_DEV_INIT_DATA ?? DEV_INIT;
 }
 

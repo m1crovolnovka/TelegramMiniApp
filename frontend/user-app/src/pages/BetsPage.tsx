@@ -13,20 +13,24 @@ export function BetsPage() {
   const [placing, setPlacing] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadEvents = () =>
     bettingApi
       .events()
       .then(setEvents)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+      .catch((e) => setError(e instanceof Error ? e.message : 'Ошибка'));
+
+  useEffect(() => {
+    loadEvents().finally(() => setLoading(false));
   }, []);
 
   const place = async (optionId: number) => {
     const stake = stakes[optionId] ?? 100;
     setPlacing(optionId);
+    setError(null);
     try {
       await bettingApi.place(optionId, stake);
-      const me = await userApi.me();
+      const [updatedEvents, me] = await Promise.all([bettingApi.events(), userApi.me()]);
+      setEvents(updatedEvents);
       setUser(me);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Ошибка');
@@ -50,7 +54,7 @@ export function BetsPage() {
             {ev.options.map((opt) => (
               <li key={opt.id} className="rounded-lg bg-zinc-900/80 p-3">
                 <p className="font-medium">{opt.label}</p>
-                <p className="text-xs text-zinc-500">Пул: {opt.totalStakeCoins} 🪙</p>
+                <p className="text-xs text-amber-300/90">Пул: {opt.totalStakeCoins.toLocaleString()} 🪙</p>
                 <input
                   type="number"
                   min={1}

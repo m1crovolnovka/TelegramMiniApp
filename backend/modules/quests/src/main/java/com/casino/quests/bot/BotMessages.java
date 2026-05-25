@@ -31,6 +31,10 @@ public final class BotMessages {
     public static final String ALREADY_HAS_QUEST = "У вас уже есть активное задание.";
     public static final String NO_FREE_PARTNERS = "Нет свободных участников.";
     public static final String PARTNER_ASSIGNED = "Вам назначено задание!\n\n%s";
+    public static final String QUEST_WITH_PARTNER = "Партнёр: @%s\n\n%s";
+    public static final String PARTNER_ASSIGNED_DETAILED =
+            "Инициатор @%s назначил вам квест!\nПартнёр: @%s\n\n%s";
+    public static final String PARTNER_PROOF_FORWARD = "Партнёр @%s отправил доказательство:";
     public static final String NO_ACTIVE_QUEST = "Нет активного задания.";
     public static final String QUEST_CANCELLED = "Задание отменено.";
     public static final String PARTNER_CANCELLED = "Партнёр @%s отменил задание.";
@@ -39,7 +43,8 @@ public final class BotMessages {
     public static final String PARTNER_NOT_STARTED = "Пользователь @%s ещё не запускал бота.";
     public static final String PROOF_SENT =
             "Доказательство отправлено. Ожидайте проверки админом.";
-    public static final String PARTNER_SENT_PROOF = "Партнёр @%s отправил доказательство.";
+    public static final String PARTNER_SENT_PROOF =
+            "Партнёр @%s отправил доказательство. Ожидайте проверки админом.";
     public static final String PENDING_REVIEW =
             "Задание на проверку #%d\n@%s + @%s\nНаграда: %d 🪙\n%s";
     public static final String BTN_APPROVE = "✅ Подтвердить";
@@ -64,10 +69,15 @@ public final class BotMessages {
             """
             Привет! Квест-бот Casino.
 
-            📷 QR — задание с другом по его username
+            📷 QR — задание с другом по username
             🎲 Случайный партнёр
             После выполнения — фото/видео доказательство
-            Админ подтверждает, коины и карточки начисляются в Casino.""";
+
+            🪙 Монеты — за каждый одобренный квест
+            🃏 Карточки партнёра (между одной парой):
+              • 1-й квест — обычная
+              • 7-й — редкая
+              • 15-й — легендарная""";
     public static final String MENU_TITLE = "Меню:";
     public static final String QUEST_INFO = "Задание:\n%s\n\nНаграда: %d 🪙";
 

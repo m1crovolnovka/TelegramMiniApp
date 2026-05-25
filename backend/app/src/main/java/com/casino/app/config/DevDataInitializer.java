@@ -54,6 +54,7 @@ public class DevDataInitializer {
         if (cardDefinitionRepository.count() > 0) {
             ensureAdminUser();
             ensureQuestTasks();
+            ensurePackDropWeights();
             return;
         }
         log.info("Seeding dev data…");
@@ -73,14 +74,10 @@ public class DevDataInitializer {
         Pack starter = packRepository.save(new Pack("Стартовый пак", 100));
         Pack premium = packRepository.save(new Pack("Премиум пак", 500));
         for (CardDefinition c : cards) {
-            int weight =
-                    switch (c.getRarity()) {
-                        case COMMON -> 50;
-                        case RARE -> 15;
-                        case LEGENDARY -> 3;
-                    };
-            packDropRowRepository.save(new PackDropRow(starter.getId(), c.getId(), weight, c.getRarity()));
-            packDropRowRepository.save(new PackDropRow(premium.getId(), c.getId(), weight * 2, c.getRarity()));
+            packDropRowRepository.save(
+                    new PackDropRow(starter.getId(), c.getId(), starterWeight(c.getRarity()), c.getRarity()));
+            packDropRowRepository.save(
+                    new PackDropRow(premium.getId(), c.getId(), premiumWeight(c.getRarity()), c.getRarity()));
         }
 
         ensureQuestTasks();
@@ -90,6 +87,46 @@ public class DevDataInitializer {
 
         ensureAdminUser();
         log.info("Dev seed complete. Admin initData hint: {}", ADMIN_INIT_HINT);
+    }
+
+    private static int starterWeight(CardRarity rarity) {
+        return switch (rarity) {
+            case COMMON -> 100;
+            case RARE -> 10;
+            case LEGENDARY -> 2;
+        };
+    }
+
+    private static int premiumWeight(CardRarity rarity) {
+        return switch (rarity) {
+            case COMMON -> 42;
+            case RARE -> 22;
+            case LEGENDARY -> 10;
+        };
+    }
+
+    private void ensurePackDropWeights() {
+        packRepository.findAll().forEach(pack -> {
+            boolean premium =
+                    pack.getName().toLowerCase().contains("премиум")
+                            || pack.getName().toLowerCase().contains("premium")
+                            || pack.getPriceCoins() >= 400;
+            for (PackDropRow row : packDropRowRepository.findByPackId(pack.getId())) {
+                cardDefinitionRepository
+                        .findById(row.getCardDefinitionId())
+                        .ifPresent(
+                                card -> {
+                                    int w =
+                                            premium
+                                                    ? premiumWeight(card.getRarity())
+                                                    : starterWeight(card.getRarity());
+                                    if (row.getWeight() != w) {
+                                        row.setWeight(w);
+                                        packDropRowRepository.save(row);
+                                    }
+                                });
+            }
+        });
     }
 
     private void ensureQuestTasks() {

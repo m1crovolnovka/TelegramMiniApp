@@ -55,19 +55,24 @@ public class TelegramInitDataValidator {
         return Optional.empty();
     }
 
-    /** Real Telegram user from initData, or deterministic dev user from token string. */
+    /** Real Telegram user from initData, or deterministic dev user from dev login token only. */
     public TelegramUserPayload resolveUser(String initData) throws Exception {
-        return parseUser(initData)
-                .orElseGet(
-                        () -> {
-                            try {
-                                long stubId = deriveStubTelegramUserId(initData);
-                                String username = resolveDevUsername(initData);
-                                return new TelegramUserPayload(stubId, username, username);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
+        Optional<TelegramUserPayload> parsed = parseUser(initData);
+        if (parsed.isPresent()) {
+            return parsed.get();
+        }
+        if (!looksLikeDevLoginToken(initData)) {
+            throw new IllegalArgumentException(
+                    "Invalid Telegram initData. Reopen the Mini App from Telegram.");
+        }
+        long stubId = deriveStubTelegramUserId(initData);
+        String username = resolveDevUsername(initData);
+        return new TelegramUserPayload(stubId, username, username);
+    }
+
+    private static boolean looksLikeDevLoginToken(String initData) {
+        String s = initData.trim().toLowerCase();
+        return s.startsWith("dev-") && s.contains("login-token");
     }
 
     public long deriveStubTelegramUserId(String initData) throws Exception {
@@ -78,18 +83,14 @@ public class TelegramInitDataValidator {
     }
 
     private String resolveDevUsername(String initData) {
-        String lower = initData.toLowerCase();
-        if (lower.contains("admin")) {
-            return "admin";
-        }
-        if (lower.contains("player")) {
-            return "player";
-        }
         Matcher matcher = DEV_USERNAME_PATTERN.matcher(initData);
         if (matcher.find()) {
             return matcher.group(1).toLowerCase();
         }
-        return "dev";
+        if (initData.toLowerCase().contains("admin")) {
+            return "admin";
+        }
+        return "player";
     }
 
     public record TelegramUserPayload(long telegramId, String username, String firstName) {}
