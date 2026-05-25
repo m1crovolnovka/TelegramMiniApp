@@ -108,4 +108,4 @@ VITE_API_URL=https://your-backend.example.com
 
 ### Идентификация пользователей
 
-Уникальный ключ — **Telegram username** (без @). Dev-токены: `dev-admin-login-token-2026` → `admin`, `dev-player-login-token-2026` → `player`.
+Уникальный ключ — **Telegram username** (без @). Dev-токены: `dev-devadmin-login-token-2026` → `devadmin` (админка), `dev-local-login-token-2026` → `local` (браузер без Telegram). Пользователи `admin` и `player` не используются.

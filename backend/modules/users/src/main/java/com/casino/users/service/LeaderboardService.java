@@ -6,6 +6,7 @@ import com.casino.economy.repository.WalletRepository;
 import com.casino.users.dto.response.LeaderboardEntryResponse;
 import com.casino.users.entity.User;
 import com.casino.users.repository.UserRepository;
+import com.casino.users.util.StubUsernames;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,9 @@ public class LeaderboardService {
         int rank = 1;
         for (Wallet w : wallets) {
             User u = users.get(w.getUserId());
+            if (u != null && StubUsernames.isStub(u.getUsername())) {
+                continue;
+            }
             String name = u != null && u.getUsername() != null ? u.getUsername() : "User #" + w.getUserId();
             long students = collectionService.countUniqueStudentsOwned(w.getUserId());
             result.add(new LeaderboardEntryResponse(rank++, w.getUserId(), name, w.getBalance(), students));

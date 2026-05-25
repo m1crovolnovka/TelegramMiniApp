@@ -123,6 +123,7 @@ export function AdminEventsPage() {
                 <span>
                   {o.label}
                   {o.winning ? ' ✓' : ''}
+                  <span className="ml-2 text-emerald-400">×{o.coefficient.toFixed(2)}</span>
                 </span>
                 <span className="text-amber-300">🪙 {o.totalStakeCoins.toLocaleString()}</span>
               </div>
@@ -142,7 +143,9 @@ export function AdminEventsPage() {
 
           {(selected.status === 'ACTIVE' || selected.status === 'CLOSED') && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-zinc-300">Выберите победителя — выплаты 2× ставки:</p>
+              <p className="text-sm font-medium text-zinc-300">
+                Выберите победителя — пул делится между ставками на победивший вариант (пари-мутуэль):
+              </p>
               <div className="flex flex-wrap gap-2">
                 {selected.options.map((o) => (
                   <Button

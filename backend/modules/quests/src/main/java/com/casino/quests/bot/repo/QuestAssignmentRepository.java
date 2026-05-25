@@ -33,8 +33,9 @@ public interface QuestAssignmentRepository extends JpaRepository<QuestAssignment
             """)
     Collection<Long> findTaskIdsApprovedByUser(@Param("user") UserEntity user);
 
+    void deleteByTask_Id(long taskId);
+
     long countByStatus(TaskStatus status);
 
     Optional<QuestAssignmentEntity> findFirstByStatusOrderByCreatedAtAsc(TaskStatus status);
 }
-

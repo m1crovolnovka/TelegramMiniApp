@@ -64,7 +64,13 @@ export interface OpenPackResponse {
 export interface PackHistoryItem { id: number; packId: number; droppedCard: DroppedCard; openedAt: string }
 export interface Quest { id: number; title: string; rewardCoins: number; status: QuestStatus }
 export interface QuestSubmission { id: number; questId: number; status: SubmissionStatus; proofText: string }
-export interface BettingOption { id: number; label: string; totalStakeCoins: number; winning: boolean }
+export interface BettingOption {
+  id: number;
+  label: string;
+  totalStakeCoins: number;
+  winning: boolean;
+  coefficient: number;
+}
 export interface BettingEvent { id: number; title: string; status: EventStatus; options: BettingOption[] }
 export interface TradeItem {
   id: number;

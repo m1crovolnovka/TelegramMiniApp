@@ -53,7 +53,7 @@ public class BetSettlementService {
         ev.setEventStatus(EventStatus.CLOSED);
     }
 
-    /** Fixed 2x payout on winning stakes for MVP. */
+    /** Parimutuel payout: winners share the whole pool proportionally to their stake. */
     @Transactional
     public void settle(long eventId, long winningOptionId) {
         BettingEvent ev = bettingEventRepository.findById(eventId).orElseThrow(() -> new BettingException("Not found"));
@@ -61,19 +61,33 @@ public class BetSettlementService {
             throw new BettingException("Event cannot be settled");
         }
         List<BettingOption> options = bettingOptionRepository.findByEventId(eventId);
+        long totalPool = options.stream().mapToLong(BettingOption::getTotalStakeCoins).sum();
+        BettingOption winningOption =
+                options.stream()
+                        .filter(o -> o.getId().equals(winningOptionId))
+                        .findFirst()
+                        .orElseThrow(() -> new BettingException("Winning option not found"));
+        long winningPool = winningOption.getTotalStakeCoins();
+
         for (BettingOption o : options) {
             o.setWinning(o.getId().equals(winningOptionId));
         }
-        List<UserBet> winners = userBetRepository.findByBettingOptionIdAndPaidOutIsFalse(winningOptionId);
-        for (UserBet b : winners) {
-            long payout = b.getStakeCoins() * 2;
-            economyPort.credit(
-                    b.getUserId(),
-                    payout,
-                    "bet-payout:" + b.getId(),
-                    TransactionType.BET_PAYOUT,
-                    "bet_payout");
-            b.setPaidOut(true);
+        if (winningPool > 0 && totalPool > 0) {
+            List<UserBet> winners = userBetRepository.findByBettingOptionIdAndPaidOutIsFalse(winningOptionId);
+            for (UserBet b : winners) {
+                long payout =
+                        BettingOddsCalculator.payoutForWinningStake(
+                                b.getStakeCoins(), winningPool, totalPool);
+                if (payout > 0) {
+                    economyPort.credit(
+                            b.getUserId(),
+                            payout,
+                            "bet-payout:" + b.getId(),
+                            TransactionType.BET_PAYOUT,
+                            "bet_payout");
+                }
+                b.setPaidOut(true);
+            }
         }
         ev.setEventStatus(EventStatus.SETTLED);
     }

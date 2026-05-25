@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsernameIgnoreCase(String username);
 
     List<User> findByIdNotAndUsernameIsNotNullOrderByUsernameAsc(long id, Pageable pageable);
+
+    List<User> findByUsernameIgnoreCaseIn(List<String> usernames);
 }

@@ -7,6 +7,7 @@ import com.casino.economy.dto.response.TransactionResponse;
 import com.casino.economy.service.TransactionHistoryService;
 import com.casino.users.entity.User;
 import com.casino.users.repository.UserRepository;
+import com.casino.users.util.StubUsernames;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class AdminUserService {
     @Transactional(readOnly = true)
     public List<AdminUserSummaryResponse> listUsers() {
         return userRepository.findAll().stream()
+                .filter(u -> !StubUsernames.isStub(u.getUsername()))
                 .map(this::toSummary)
                 .toList();
     }

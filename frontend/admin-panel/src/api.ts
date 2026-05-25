@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const apiBase = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 const ADMIN_INIT =
-  import.meta.env.VITE_ADMIN_INIT_DATA ?? 'dev-admin-login-token-2026';
+  import.meta.env.VITE_ADMIN_INIT_DATA ?? 'dev-devadmin-login-token-2026';
 
 export const api = axios.create({
   baseURL: apiBase,

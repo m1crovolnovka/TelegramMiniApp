@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class DevDataInitializer {
 
-    public static final String ADMIN_INIT_HINT = "dev-admin-login-token-2026";
+    public static final String ADMIN_INIT_HINT = "dev-devadmin-login-token-2026";
 
     private final CardDefinitionRepository cardDefinitionRepository;
     private final PackRepository packRepository;
@@ -58,6 +58,7 @@ public class DevDataInitializer {
     @Transactional
     public void seed() {
         if (cardDefinitionRepository.count() > 0) {
+            purgeStubUsers();
             ensureAdminUser();
             ensureQuestTasks();
             ensurePackDropWeights();
@@ -195,6 +196,11 @@ public class DevDataInitializer {
         return c;
     }
 
+    private void purgeStubUsers() {
+        userRepository.findByUsernameIgnoreCaseIn(List.of("admin", "player")).forEach(userRepository::delete);
+        log.info("Removed stub users admin/player if present");
+    }
+
     private void ensureAdminUser() {
         long adminTelegramId;
         try {
@@ -205,11 +211,11 @@ public class DevDataInitializer {
         }
         User admin =
                 userRepository
-                        .findByUsernameIgnoreCase("admin")
+                        .findByUsernameIgnoreCase("devadmin")
                         .orElseGet(
                                 () ->
                                         userRepository.save(
-                                                new User(adminTelegramId, "admin", UserRole.ADMIN)));
+                                                new User(adminTelegramId, "devadmin", UserRole.ADMIN)));
         if (admin.getRole() != UserRole.ADMIN) {
             admin.setRole(UserRole.ADMIN);
         }

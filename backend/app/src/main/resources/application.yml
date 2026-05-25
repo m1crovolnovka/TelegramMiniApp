@@ -17,7 +17,7 @@ casino:
       - http://localhost:5174
   admin:
     allowed-usernames:
-      - admin
+      - devadmin
       # CASINO_ADMIN_ALLOWED_USERNAMES=nick1,nick2
 
 ---

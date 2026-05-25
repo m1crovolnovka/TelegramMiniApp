@@ -2,6 +2,7 @@ package com.casino.quests.bot.service;
 
 import com.casino.quests.bot.config.QuestBotProperties;
 import com.casino.quests.bot.entity.QuestTaskEntity;
+import com.casino.quests.bot.repo.QuestAssignmentRepository;
 import com.casino.quests.bot.repo.QuestTaskRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminService {
 
     private final QuestTaskRepository questTaskRepository;
+    private final QuestAssignmentRepository questAssignmentRepository;
     private final QuestBotProperties properties;
 
     public boolean isAdmin(long telegramId, String username) {
@@ -32,6 +34,7 @@ public class AdminService {
 
     @Transactional
     public void deleteTask(long id) {
+        questAssignmentRepository.deleteByTask_Id(id);
         questTaskRepository.deleteById(id);
     }
 

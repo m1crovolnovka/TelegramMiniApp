@@ -44,6 +44,9 @@ export function BetsPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">Ставки на события</h1>
+      <p className="text-sm text-zinc-400">
+        Коэффициент падает, если на вариант ставят больше. Выигрыш ≈ ставка × коэффициент на момент расчёта.
+      </p>
       {error && <PageError message={error} />}
       {events.length === 0 && <p className="text-zinc-500">Нет активных событий</p>}
       {events.map((ev) => (
@@ -54,6 +57,9 @@ export function BetsPage() {
             {ev.options.map((opt) => (
               <li key={opt.id} className="rounded-lg bg-zinc-900/80 p-3">
                 <p className="font-medium">{opt.label}</p>
+                <p className="text-xs text-emerald-300">
+                  Коэффициент: <span className="font-semibold">×{opt.coefficient.toFixed(2)}</span>
+                </p>
                 <p className="text-xs text-amber-300/90">Пул: {opt.totalStakeCoins.toLocaleString()} 🪙</p>
                 <input
                   type="number"

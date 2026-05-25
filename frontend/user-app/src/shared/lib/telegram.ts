@@ -1,6 +1,6 @@
 import WebApp from '@twa-dev/sdk';
 
-const DEV_INIT = 'dev-player-login-token-2026';
+const DEV_INIT = 'dev-local-login-token-2026';
 
 export function initTelegram() {
   try {

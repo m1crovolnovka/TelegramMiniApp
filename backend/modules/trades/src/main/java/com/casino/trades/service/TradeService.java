@@ -14,6 +14,7 @@ import com.casino.trades.repository.TradeItemRepository;
 import com.casino.trades.repository.TradeRepository;
 import com.casino.users.dto.response.PublicUserResponse;
 import com.casino.users.repository.UserRepository;
+import com.casino.users.util.StubUsernames;
 import com.casino.users.service.UserService;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -175,6 +176,8 @@ public class TradeService {
                         });
         userRepository
                 .findByIdNotAndUsernameIsNotNullOrderByUsernameAsc(userId, PageRequest.of(0, limit))
+                .stream()
+                .filter(u -> !StubUsernames.isStub(u.getUsername()))
                 .forEach(u -> ordered.add(u.getId()));
 
         List<PublicUserResponse> result = new ArrayList<>();
@@ -184,6 +187,7 @@ public class TradeService {
             }
             userRepository
                     .findById(id)
+                    .filter(u -> !StubUsernames.isStub(u.getUsername()))
                     .ifPresent(
                             u ->
                                     result.add(

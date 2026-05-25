@@ -87,10 +87,12 @@ public class TelegramInitDataValidator {
         if (matcher.find()) {
             return matcher.group(1).toLowerCase();
         }
-        if (initData.toLowerCase().contains("admin")) {
-            return "admin";
+        try {
+            long id = deriveStubTelegramUserId(initData);
+            return "dev" + Long.toHexString(id).substring(0, Math.min(8, Long.toHexString(id).length()));
+        } catch (Exception e) {
+            return "devuser";
         }
-        return "player";
     }
 
     public record TelegramUserPayload(long telegramId, String username, String firstName) {}
