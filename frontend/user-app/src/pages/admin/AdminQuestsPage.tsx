@@ -15,20 +15,16 @@ export function AdminQuestsPage() {
     reload();
   }, []);
 
-  const botUsername = import.meta.env.VITE_QUESTS_BOT_USERNAME ?? 'your_quest_bot';
-
   return (
     <div className="space-y-4">
       <section className="rounded-xl border border-violet-500/30 bg-violet-900/20 p-4 text-sm text-zinc-300">
         <p>
-          Квесты выполняются в Telegram-боте{' '}
-          <a className="text-violet-300" href={`https://t.me/${botUsername}`} target="_blank" rel="noreferrer">
-            @{botUsername}
-          </a>
-          . Здесь вы управляете шаблонами заданий (текст + награда в монетах).
+          Квесты выполняются в Telegram-боте Mini App. Здесь — шаблоны заданий (текст и награда в монетах).
+          Модерация — в боте (кнопки подтвердить/отклонить).
         </p>
         <p className="mt-2 text-xs text-zinc-500">
-          Для запуска бота задайте переменную <code className="text-zinc-400">QUEST_BOT_TOKEN</code> при старте backend.
+          Админ бота: <code className="text-zinc-400">QUEST_BOT_ADMIN_USERNAMES</code> (username без @).
+          Админ должен написать боту /start, чтобы получать уведомления.
         </p>
       </section>
 

@@ -1,5 +1,6 @@
 package com.casino.casino.service;
 
+import com.casino.casino.dto.response.SlotSpinResponse;
 import com.casino.casino.entity.SlotSpin;
 import com.casino.casino.repository.SlotSpinRepository;
 import com.casino.casino.rtp.RTPService;
@@ -20,7 +21,8 @@ public class SlotService {
     private final RTPService rtpService;
 
     @Transactional
-    public long spin(long userId, long bet) {
+    public SlotSpinResponse spin(long userId, long bet, String variant) {
+        String gameVariant = variant == null || variant.isBlank() ? "sweet-bonanza" : variant;
         String debitId = "casino:slots:debit:" + UUID.randomUUID();
         economyPort.debit(userId, bet, debitId, TransactionType.CASINO_BET, "slots_bet");
         double mult = rtpService.rollSlotMultiplier();
@@ -29,8 +31,9 @@ public class SlotService {
             String creditId = "casino:slots:credit:" + UUID.randomUUID();
             economyPort.credit(userId, payout, creditId, TransactionType.CASINO_WIN, "slots_payout");
         }
-        slotSpinRepository.save(new SlotSpin(userId, "SLOTS", bet, payout));
-        return payout;
+        List<String> symbols = SlotSymbolPicker.pickSymbols(gameVariant, mult);
+        slotSpinRepository.save(new SlotSpin(userId, gameVariant.toUpperCase(), bet, payout));
+        return new SlotSpinResponse(payout, gameVariant, symbols);
     }
 
     @Transactional(readOnly = true)

@@ -58,7 +58,6 @@ casino:
       username: ${QUEST_BOT_USERNAME:}
     mini-app-url: ${CASINO_MINI_APP_URL:http://localhost:5173}
     admin:
-      telegram-ids: ${QUEST_BOT_ADMIN_IDS:}
       usernames: ${QUEST_BOT_ADMIN_USERNAMES:admin}
 
 ---
@@ -86,7 +85,6 @@ casino:
       username: ${QUEST_BOT_USERNAME:}
     mini-app-url: ${CASINO_MINI_APP_URL:http://localhost:5173}
     admin:
-      telegram-ids: ${QUEST_BOT_ADMIN_IDS:}
       usernames: ${QUEST_BOT_ADMIN_USERNAMES:admin}
 
 management:

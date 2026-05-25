@@ -1,7 +1,9 @@
 package com.casino.betting.service;
 
 import com.casino.betting.dto.request.CreateBettingEventRequest;
+import com.casino.betting.dto.response.BettingEventResponse;
 import com.casino.betting.entity.BettingEvent;
+import com.casino.betting.mapper.BettingMapper;
 import com.casino.betting.entity.BettingOption;
 import com.casino.betting.entity.EventStatus;
 import com.casino.betting.exception.BettingException;
@@ -24,6 +26,14 @@ public class BetSettlementService {
     private final BettingOptionRepository bettingOptionRepository;
     private final UserBetRepository userBetRepository;
     private final EconomyPort economyPort;
+    private final BettingMapper bettingMapper;
+
+    @Transactional(readOnly = true)
+    public List<BettingEventResponse> listAllEvents() {
+        return bettingEventRepository.findAllByOrderByIdDesc().stream()
+                .map(e -> bettingMapper.toEvent(e, bettingOptionRepository.findByEventId(e.getId())))
+                .toList();
+    }
 
     @Transactional
     public BettingEvent createEvent(CreateBettingEventRequest req) {

@@ -25,19 +25,8 @@ public class QuestBotProperties {
     @Getter
     @Setter
     public static class Admin {
-        private String telegramIds = "";
+        /** Comma-separated Telegram usernames (without @) with bot admin rights. */
         private String usernames = "admin";
-
-        public List<Long> telegramIdList() {
-            if (telegramIds == null || telegramIds.isBlank()) {
-                return List.of();
-            }
-            return Arrays.stream(telegramIds.split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .map(Long::parseLong)
-                    .toList();
-        }
 
         public List<String> usernameList() {
             if (usernames == null || usernames.isBlank()) {

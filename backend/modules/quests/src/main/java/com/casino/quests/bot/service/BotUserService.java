@@ -4,8 +4,11 @@ import com.casino.quests.bot.config.QuestBotProperties;
 import com.casino.quests.bot.entity.UserEntity;
 import com.casino.quests.bot.integration.CasinoQuestBridge;
 import com.casino.quests.bot.repo.BotUserRepository;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,9 +47,17 @@ public class BotUserService {
         return botUserRepository.findByUsernameIgnoreCase(normalize(username));
     }
 
+    /** Chat IDs of quest-bot admins (resolved by username from bot_users). */
     @Transactional(readOnly = true)
     public List<Long> adminChatIds() {
-        return properties.getAdmin().telegramIdList();
+        Set<Long> ids = new LinkedHashSet<>();
+        for (String username : properties.getAdmin().usernameList()) {
+            botUserRepository
+                    .findByUsernameIgnoreCase(username)
+                    .map(UserEntity::getTelegramChatId)
+                    .ifPresent(ids::add);
+        }
+        return new ArrayList<>(ids);
     }
 
     private static String normalize(String username) {

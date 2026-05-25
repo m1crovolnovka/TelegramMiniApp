@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface BettingEventRepository extends JpaRepository<BettingEvent, Long> {
 
     List<BettingEvent> findByEventStatus(EventStatus status);
+
+    List<BettingEvent> findAllByOrderByIdDesc();
 }

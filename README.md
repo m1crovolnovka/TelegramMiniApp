@@ -97,8 +97,7 @@ VITE_API_URL=https://your-backend.example.com
 |----------|----------|
 | `QUEST_BOT_TOKEN` | Токен Telegram-бота квестов (обязателен для запуска бота) |
 | `QUEST_BOT_USERNAME` | Username бота (без @) |
-| `QUEST_BOT_ADMIN_IDS` | Telegram ID админов через запятую |
-| `QUEST_BOT_ADMIN_USERNAMES` | Usernames админов бота (по умолчанию `admin`) |
+| `QUEST_BOT_ADMIN_USERNAMES` | Usernames админов бота через запятую, без @ (по умолчанию `admin`). Админ должен написать боту /start |
 | `CASINO_MINI_APP_URL` | URL Mini App для кнопки в боте |
 
 Пользователь идентифицируется по **Telegram username**. При `/start` создаётся запись в Casino.  

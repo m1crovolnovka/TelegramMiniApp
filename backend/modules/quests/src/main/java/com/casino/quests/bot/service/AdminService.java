@@ -18,9 +18,6 @@ public class AdminService {
     private final QuestBotProperties properties;
 
     public boolean isAdmin(long telegramId, String username) {
-        if (properties.getAdmin().telegramIdList().contains(telegramId)) {
-            return true;
-        }
         if (username == null || username.isBlank()) {
             return false;
         }

@@ -53,7 +53,13 @@ export const packsApi = {
 };
 
 export const casinoApi = {
-  spin: (bet: number) => api.post<number>('/api/casino/slots/spin', { bet }).then((r) => r.data),
+  spin: (bet: number, variant: string) =>
+    api
+      .post<{ payout: number; variant: string; symbols: string[] }>('/api/casino/slots/spin', {
+        bet,
+        variant,
+      })
+      .then((r) => r.data),
   slotsHistory: () => api.get('/api/casino/slots/history').then((r) => r.data),
   rouletteBet: (body: { betType: string; numberValue?: number; stake: number }) =>
     api.post<RouletteResult>('/api/casino/roulette/bet', body).then((r) => r.data),
@@ -111,6 +117,7 @@ export const adminApi = {
   createQuestTask: (description: string, rewardCoins: number) =>
     api.post('/api/admin/quest-tasks', { description, rewardCoins }),
   deleteQuestTask: (id: number) => api.delete(`/api/admin/quest-tasks/${id}`),
+  bettingEvents: () => api.get<BettingEvent[]>('/api/admin/betting/events'),
   createEvent: (title: string, optionLabels: string[]) => api.post('/api/admin/betting/events', { title, optionLabels }),
   closeEvent: (eventId: number) => api.post(`/api/admin/betting/events/${eventId}/close`),
   settleEvent: (eventId: number, winningOptionId: number) => api.post(`/api/admin/betting/events/${eventId}/settle`, { winningOptionId }),

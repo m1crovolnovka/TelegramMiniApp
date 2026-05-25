@@ -364,53 +364,67 @@ public class EventManagerBot extends TelegramLongPollingBot {
     }
 
     private void handleCallback(CallbackQuery callback) throws TelegramApiException {
+        String callbackId = callback.getId();
         if (!(callback.getMessage() instanceof Message message)) {
+            answerCallback(callbackId, null);
             return;
         }
         long chatId = message.getChatId();
         User from = callback.getFrom();
         String data = callback.getData();
-        if (!data.startsWith("admin:")) {
+        if (data == null || !data.startsWith("admin:")) {
+            answerCallback(callbackId, null);
             return;
         }
         if (!adminService.isAdmin(from.getId(), from.getUserName())) {
+            answerCallback(callbackId, BotMessages.NO_RIGHTS);
             sendText(chatId, BotMessages.NO_RIGHTS);
             return;
         }
         String[] parts = data.split(":");
         String action = parts[1];
-        if ("start_add_task".equals(action)) {
-            session(chatId).setAwaitingNewTaskText(true);
-            sendText(chatId, BotMessages.ENTER_NEW_TASK);
-            clearInlineKeyboard(chatId, message.getMessageId());
-            return;
-        }
-        if ("view_pending".equals(action)) {
-            Optional<QuestAssignmentEntity> pending = questService.findFirstPending();
-            if (pending.isPresent()) {
-                sendText(
-                        chatId,
-                        BotMessages.PENDING_INFO.formatted(
-                                pending.get().getId(),
-                                pending.get().getUserA().getUsername(),
-                                pending.get().getUserB().getUsername()));
-            } else {
-                sendText(chatId, BotMessages.ALL_REVIEWED);
+        try {
+            if ("start_add_task".equals(action)) {
+                session(chatId).setAwaitingNewTaskText(true);
+                sendText(chatId, BotMessages.ENTER_NEW_TASK);
+                clearInlineKeyboard(chatId, message.getMessageId());
+                answerCallback(callbackId, null);
+                return;
             }
-            return;
+            if ("view_pending".equals(action)) {
+                Optional<QuestAssignmentEntity> pending = questService.findFirstPending();
+                if (pending.isPresent()) {
+                    sendText(
+                            chatId,
+                            BotMessages.PENDING_INFO.formatted(
+                                    pending.get().getId(),
+                                    pending.get().getUserA().getUsername(),
+                                    pending.get().getUserB().getUsername()));
+                } else {
+                    sendText(chatId, BotMessages.ALL_REVIEWED);
+                }
+                answerCallback(callbackId, null);
+                return;
+            }
+            if ("list_tasks".equals(action)) {
+                sendTasksList(chatId, parts.length > 2 ? Integer.parseInt(parts[2]) : 0);
+                answerCallback(callbackId, null);
+                return;
+            }
+            if (parts.length < 3) {
+                answerCallback(callbackId, null);
+                return;
+            }
+            long assignmentId = Long.parseLong(parts[2]);
+            processAdminDecision(action, assignmentId, chatId, message, callbackId);
+        } catch (Exception e) {
+            log.error("Admin callback failed: {}", data, e);
+            answerCallback(callbackId, "Ошибка: " + e.getMessage());
         }
-        if ("list_tasks".equals(action)) {
-            sendTasksList(chatId, parts.length > 2 ? Integer.parseInt(parts[2]) : 0);
-            return;
-        }
-        if (parts.length < 3) {
-            return;
-        }
-        long assignmentId = Long.parseLong(parts[2]);
-        processAdminDecision(action, assignmentId, chatId, message);
     }
 
-    private void processAdminDecision(String action, long assignmentId, long chatId, Message message)
+    private void processAdminDecision(
+            String action, long assignmentId, long chatId, Message message, String callbackId)
             throws TelegramApiException {
         Optional<QuestAssignmentEntity> opt =
                 "approve".equals(action)
@@ -418,26 +432,42 @@ public class EventManagerBot extends TelegramLongPollingBot {
                         : questService.reject(assignmentId);
         clearInlineKeyboard(chatId, message.getMessageId());
         if (opt.isEmpty()) {
+            String msg = BotMessages.ALREADY_HANDLED.formatted(assignmentId);
             execute(
                     EditMessageText.builder()
                             .chatId(chatId)
                             .messageId(message.getMessageId())
-                            .text(BotMessages.ALREADY_HANDLED.formatted(assignmentId))
+                            .text(msg)
                             .build());
+            answerCallback(callbackId, msg);
             return;
         }
         QuestAssignmentEntity a = opt.get();
         boolean approved = a.getStatus() == TaskStatus.APPROVED;
+        String msg =
+                approved
+                        ? BotMessages.APPROVED.formatted(assignmentId)
+                        : BotMessages.REJECTED.formatted(assignmentId);
         execute(
                 EditMessageText.builder()
                         .chatId(chatId)
                         .messageId(message.getMessageId())
-                        .text(
-                                approved
-                                        ? BotMessages.APPROVED.formatted(assignmentId)
-                                        : BotMessages.REJECTED.formatted(assignmentId))
+                        .text(msg)
                         .build());
+        answerCallback(callbackId, approved ? "Подтверждено" : "Отклонено");
         notifyUsersAboutDecision(a, approved);
+    }
+
+    private void answerCallback(String callbackQueryId, String text) {
+        try {
+            var builder = AnswerCallbackQuery.builder().callbackQueryId(callbackQueryId);
+            if (text != null && !text.isBlank()) {
+                builder.text(text.length() > 200 ? text.substring(0, 200) : text);
+            }
+            execute(builder.build());
+        } catch (TelegramApiException e) {
+            log.warn("answerCallback failed", e);
+        }
     }
 
     private void notifyUsersAboutDecision(QuestAssignmentEntity a, boolean approved) {

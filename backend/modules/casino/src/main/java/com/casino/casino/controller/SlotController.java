@@ -1,6 +1,7 @@
 package com.casino.casino.controller;
 
 import com.casino.casino.dto.request.SpinRequest;
+import com.casino.casino.dto.response.SlotSpinResponse;
 import com.casino.casino.entity.SlotSpin;
 import com.casino.casino.service.SlotService;
 import jakarta.validation.Valid;
@@ -21,9 +22,9 @@ public class SlotController {
     private final SlotService slotService;
 
     @PostMapping("/spin")
-    public long spin(Authentication authentication, @Valid @RequestBody SpinRequest body) {
+    public SlotSpinResponse spin(Authentication authentication, @Valid @RequestBody SpinRequest body) {
         long userId = (Long) authentication.getPrincipal();
-        return slotService.spin(userId, body.bet());
+        return slotService.spin(userId, body.bet(), body.resolvedVariant());
     }
 
     @GetMapping("/history")
